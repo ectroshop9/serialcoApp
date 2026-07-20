@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { 
   CheckCircle, Shield, Star, Zap, Search, ChevronLeft, 
-  Check, Sparkles, Headphones, CreditCard, MessageCircle 
+  Check, Sparkles, Loader2 
 } from 'lucide-react';
 import Modal from '../components/UI/Modal';
+import PaymentModal from '../components/PaymentModal';
 
 export default function LandingPage() {
   const [showPayment, setShowPayment] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) setIsLoggedIn(true);
+
     const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
     if (!elements.length) return;
     const revealElement = (element: HTMLElement) => { element.classList.add('is-visible'); };
@@ -26,6 +34,17 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const sanitizedQuery = searchQuery.trim();
+    if (!sanitizedQuery) return;
+    setIsSearching(true);
+    setTimeout(() => {
+      window.location.href = `/#/search?q=${encodeURIComponent(sanitizedQuery)}`;
+      setIsSearching(false);
+    }, 600);
+  };
+
   const handleSubscribe = (plan: string) => {
     setSelectedPlan(plan);
     setShowPayment(true);
@@ -38,8 +57,8 @@ export default function LandingPage() {
     { name: 'Condor', image: '/brands/condor.png' },
     { name: 'Iris', image: '/brands/iris-logo.png' },
     { name: 'Stream', image: '/brands/stream.png' },
-    { name: 'Rapitron', image: '/brands/rapitron.png' },
-    { name: 'Hisense', image: '/brands/placeholder.svg' },
+    { name: 'maxtor', image: '/brands/maxtor.png' },
+    { name: 'kiowa', image: '/brands/kiowa.png' },
   ];
 
   const features = [
@@ -52,12 +71,23 @@ export default function LandingPage() {
   return (
     <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', direction: 'rtl', minHeight: '100vh' }}>
       
+      <Helmet>
+        <title>SerialcoTV | منصة السوفتوير والمخططات الأولى في الجزائر</title>
+        <meta name="description" content="أول منصة جزائرية موثوقة توفر تحديثات السوفتوير والمخططات الهندسية الدقيقة لأكثر من 10,000 موديل شاشة." />
+        <meta property="og:title" content="SerialcoTV | منصة السوفتوير والمخططات" />
+        <meta property="og:description" content="حمل أحدث ملفات السوفتوير والمخططات بأسعار تنافسية والدفع عبر بريدي موب أو البطاقة الذهبية." />
+      </Helmet>
+
       {/* Navbar */}
       <nav className="glass sticky top-0 z-50" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', padding: '10px 16px' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="text-lg font-black tracking-wider" style={{ color: 'var(--primary)' }}>SERIALCO<span style={{ color: 'var(--accent)' }}>TV</span></div>
           <div className="flex items-center gap-2">
-            <Link to="/login" className="btn btn-ghost text-xs px-3 py-1.5 hidden sm:inline-flex">تسجيل الدخول</Link>
+            {isLoggedIn ? (
+              <Link to="/dashboard" className="btn btn-primary text-xs px-3 py-1.5">لوحة التحكم</Link>
+            ) : (
+              <Link to="/login" className="btn btn-ghost text-xs px-3 py-1.5 hidden sm:inline-flex">تسجيل الدخول</Link>
+            )}
             <button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary text-xs px-3 py-1.5">اشترك الآن</button>
           </div>
         </div>
@@ -68,16 +98,25 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto text-center reveal" data-reveal>
           <h1 style={{ fontSize: 'clamp(20px, 3.5vw, 32px)', fontWeight: 900, marginBottom: '12px', lineHeight: 1.35 }}>الحل الجذري لأعطال شاشات LED و Plasma<br /><span style={{ color: 'var(--accent)' }}>في ثوانٍ معدودة.</span></h1>
           <p style={{ fontSize: '13px', color: '#f1f5f9', opacity: 0.9, maxWidth: '550px', margin: '0 auto 20px auto' }}>أول منصة جزائرية موثوقة توفر تحديثات السوفتوير والمخططات الهندسية الدقيقة لأكثر من 10,000 موديل شاشة.</p>
-          <button onClick={() => document.getElementById('search')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-accent text-xs py-2.5 px-5 shadow-md"><span>ابحث عن ملفك الآن</span><ChevronLeft size={16} /></button>
+          <Link to="/products" className="btn btn-accent text-xs py-2.5 px-5 shadow-md" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span>تصفح الآن</span>
+            <ChevronLeft size={16} />
+          </Link>
         </div>
       </header>
 
       {/* Search */}
       <section id="search" className="search-section reveal" data-reveal style={{ maxWidth: '700px', margin: '-30px auto 30px auto', padding: '0 16px' }}>
         <div className="card" style={{ padding: '12px 16px', boxShadow: '0 8px 20px rgba(0,0,0,0.06)' }}>
-          <form style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }} onSubmit={(e) => e.preventDefault()}>
-            <div className="field" style={{ flex: '1 1 200px' }}><input type="text" placeholder="ابحث برقم الموديل أو رقم اللوحة (MainBoard)..." className="field-input" style={{ padding: '8px 12px', fontSize: '12px' }} /></div>
-            <button type="submit" className="btn btn-primary text-xs" style={{ minWidth: '90px', padding: '8px 14px' }}><Search size={14} /><span>بحث</span></button>
+          <form style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }} onSubmit={handleSearch}>
+            <div className="field" style={{ flex: '1 1 200px' }}>
+              <input type="text" placeholder="ابحث برقم الموديل أو رقم اللوحة (MainBoard)..." className="field-input" style={{ padding: '8px 12px', fontSize: '12px' }}
+                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} disabled={isSearching} />
+            </div>
+            <button type="submit" className="btn btn-primary text-xs" style={{ minWidth: '90px', padding: '8px 14px' }} disabled={isSearching}>
+              {isSearching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+              <span>{isSearching ? 'جاري...' : 'بحث'}</span>
+            </button>
           </form>
         </div>
       </section>
@@ -135,7 +174,7 @@ export default function LandingPage() {
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '16px' }}><span style={{ fontSize: '26px', fontWeight: 900, color: 'var(--accent)' }}>3000</span><span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>د.ج / باقة</span></div>
                 <hr style={{ borderColor: 'var(--border)', margin: '0 0 16px 0' }} />
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><Check size={14} style={{ color: 'var(--accent)' }} /><span style={{ fontWeight: 'bold' }}>50 ملف تحميل سوفتوير</span></li>
+                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><Check size={14} style={{ color: 'var(--accent)' }} /><span style={{ fontWeight: 'bold' }}>خمسون ألف توكن</span></li>
                   <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><Check size={14} style={{ color: 'var(--accent)' }} /><span>مخططات ومستندات كاملة</span></li>
                   <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><Check size={14} style={{ color: 'var(--accent)' }} /><span>أولوية ومساندة في الدعم الفني</span></li>
                 </ul>
@@ -151,7 +190,7 @@ export default function LandingPage() {
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '16px' }}><span style={{ fontSize: '26px', fontWeight: 900, color: 'var(--primary)' }}>1500</span><span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>د.ج / باقة</span></div>
                 <hr style={{ borderColor: 'var(--border)', margin: '0 0 16px 0' }} />
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><Check size={14} style={{ color: 'var(--success)' }} /><span>20 ملف تحميل سوفتوير</span></li>
+                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><Check size={14} style={{ color: 'var(--success)' }} /><span>عشرون ألف توكن</span></li>
                   <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><Check size={14} style={{ color: 'var(--success)' }} /><span>مخططات ومستندات كاملة</span></li>
                   <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><Check size={14} style={{ color: 'var(--success)' }} /><span>صلاحية استخدام غير محدودة</span></li>
                 </ul>
@@ -159,36 +198,12 @@ export default function LandingPage() {
               <button onClick={() => handleSubscribe('فضية')} className="btn btn-ghost btn-block text-xs py-2.5" style={{ width: '100%', marginTop: 'auto' }}>اشترك الآن</button>
             </div>
           </div>
-
-          <div className="reveal" data-reveal style={{ marginTop: '25px', padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}><Headphones size={16} style={{ color: 'var(--primary)' }} /><span>هل تحتاج باقة خاصة لمركز صيانة كبير؟</span></div>
-            <Link to="/contact" style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--primary)', textDecoration: 'none' }}>تواصل مع المبيعات ←</Link>
-          </div>
         </div>
       </section>
 
       {/* Payment Modal */}
       <Modal isOpen={showPayment} onClose={() => setShowPayment(false)} title="اختر طريقة الدفع">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <a
-            href="https://chargily.com/pay/..."
-            target="_blank"
-            className="btn btn-accent btn-block"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-          >
-            <CreditCard size={18} />
-            الدفع بالبطاقة الذهبية / CIB
-          </a>
-          <a
-            href={`https://wa.me/213xxxxxxxxx?text=مرحباً، أريد الاشتراك في الباقة ${selectedPlan} والدفع عبر بريدي موب`}
-            target="_blank"
-            className="btn btn-success btn-block"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#25D366', color: '#fff' }}
-          >
-            <MessageCircle size={18} />
-            الدفع عبر بريدي موب (WhatsApp)
-          </a>
-        </div>
+        <PaymentModal selectedPlan={selectedPlan} setShowPayment={setShowPayment} />
       </Modal>
 
       {/* Footer */}
@@ -210,13 +225,13 @@ export default function LandingPage() {
           <div>
             <h4 style={{ color: '#fff', fontWeight: 'bold', marginBottom: '8px', fontSize: '12px' }}>تابعنا</h4>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <a href="#" style={{ background: '#1877F2', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', color: '#fff' }}>
+              <a href="#" target="_blank" rel="noopener noreferrer" style={{ background: '#1877F2', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', color: '#fff' }}>
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
               </a>
-              <a href="#" style={{ background: '#0088cc', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', color: '#fff' }}>
+              <a href="#" target="_blank" rel="noopener noreferrer" style={{ background: '#0088cc', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', color: '#fff' }}>
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.46-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.442-.751-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.145.118.185.276.204.408.019.132.043.43.024.662z"/></svg>
               </a>
-              <a href="#" style={{ background: '#FF0000', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', color: '#fff' }}>
+              <a href="#" target="_blank" rel="noopener noreferrer" style={{ background: '#FF0000', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', color: '#fff' }}>
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
               </a>
             </div>
