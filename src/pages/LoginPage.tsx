@@ -13,7 +13,8 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: '', phone: '', email: '', password: '' });
+  // تم إضافة acceptTerms هنا
+  const [form, setForm] = useState({ name: '', phone: '', email: '', password: '', acceptTerms: false });
 
   // إذا كان المستخدم مسجلاً بالفعل، يتم توجيهه مباشرة دون إظهار صفحة تسجيل الدخول
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
@@ -21,7 +22,11 @@ export default function LoginPage() {
   const validateForm = () => {
     if (!form.email || !form.password) return 'البريد الإلكتروني وكلمة المرور مطلوبان';
     if (form.password.length < 6) return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-    if (isRegister && (!form.name || !form.phone)) return 'يرجى ملء جميع الحقول المطلوبة';
+    if (isRegister) {
+      if (!form.name || !form.phone) return 'يرجى ملء جميع الحقول المطلوبة';
+      // شرط التحقق من الموافقة على الشروط
+      if (!form.acceptTerms) return 'يجب الموافقة على سياسة الخصوصية وشروط الاستخدام للمتابعة';
+    }
     return null;
   };
 
@@ -71,7 +76,8 @@ export default function LoginPage() {
   const toggleMode = () => {
     setIsRegister(!isRegister);
     setError(null);
-    setForm({ name: '', phone: '', email: '', password: '' }); // تفريغ الحقول عند التبديل
+    // تفريغ الحقول عند التبديل بما فيها زر الموافقة
+    setForm({ name: '', phone: '', email: '', password: '', acceptTerms: false }); 
   };
 
   return (
@@ -139,6 +145,23 @@ export default function LoginPage() {
               {showPw ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
             </span>
           </div>
+
+          {/* ★ خانة الموافقة على الشروط وسياسة الخصوصية (تظهر فقط عند التسجيل) ★ */}
+          {isRegister && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 4, marginBottom: 4 }}>
+              <input 
+                type="checkbox" 
+                id="acceptTerms" 
+                checked={form.acceptTerms} 
+                onChange={e => setForm({...form, acceptTerms: e.target.checked})}
+                style={{ width: 18, height: 18, accentColor: 'var(--primary)', cursor: 'pointer', marginTop: 2, flexShrink: 0 }}
+              />
+              <label htmlFor="acceptTerms" style={{ fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.5 }}>
+                أوافق على <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'underline' }}>سياسة الخصوصية</a> و<a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'underline' }}>شروط الاستخدام</a>.
+              </label>
+            </div>
+          )}
+
           <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={isLoading} style={{ opacity: isLoading ? 0.7 : 1, cursor: isLoading ? 'not-allowed' : 'pointer' }}>
             {isLoading ? 'جاري التحميل...' : (isRegister ? 'إنشاء الحساب' : 'تسجيل الدخول')}
           </button>

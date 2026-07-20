@@ -1,7 +1,13 @@
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import MainLayout from './components/Layout/MainLayout';
+import LandingPage from './pages/LandingPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsOfUsePage from './pages/TermsOfUsePage';
+import FAQPage from './pages/FAQPage';
+import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import FilesPage from './pages/FilesPage';
@@ -18,17 +24,29 @@ import ProductsPage from './pages/ProductsPage';
 import PublicProductsPage from './pages/PublicProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <HashRouter>
+          <ScrollToTop />
           <Routes>
-            {/* خارج اللوحة - بدون MainLayout */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsOfUsePage />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/products" element={<PublicProductsPage />} />
             
-            {/* داخل اللوحة - مع MainLayout */}
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/files" element={<FilesPage />} />
@@ -45,7 +63,7 @@ export default function App() {
               <Route path="/profile" element={<ProfilePage />} />
             </Route>
             
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </HashRouter>
       </AuthProvider>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Modal from '../components/UI/Modal';
 import { Search, Download, ShoppingCart, Tv } from 'lucide-react';
@@ -12,99 +12,203 @@ interface Product {
   description?: string;
 }
 
+const API_BASE_URL = 'https://serialcotv.onrender.com/api/store';
+const PLACEHOLDER_IMAGE = '/placeholder.jpg';
+
 export default function PublicProductsPage() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState('');
-  const [type, setType] = useState('');
-  const [serialModal, setSerialModal] = useState(false);
-  const [selProduct, setSelProduct] = useState<Product | null>(null);
-  const [serial, setSerial] = useState('');
-  const [pin, setPin] = useState('');
-
-  const API = 'https://serialcotv.onrender.com/api/store';
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<string>('');
+  
+  // حالات النافذة المنبثقة (Modal)
+  const [isSerialModalOpen, setIsSerialModalOpen] = useState<boolean>(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [serialCode, setSerialCode] = useState<string>('');
+  const [pinCode, setPinCode] = useState<string>('');
 
   useEffect(() => {
+    let isMounted = true;
     setLoading(true);
+
     const params = new URLSearchParams();
-    if (type) params.append('type', type);
-    fetch(`${API}/products/?${params}`)
+    if (selectedType) {
+      params.append('type', selectedType);
+    }
+
+    fetch(`${API_BASE_URL}/products/?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        setProducts(data.products || []);
-        setLoading(false);
+        if (isMounted) {
+          setProducts(data.products || []);
+          setLoading(false);
+        }
       })
-      .catch(() => setLoading(false));
-  }, [type]);
+      .catch(error => {
+        console.error('Error fetching products:', error);
+        if (isMounted) {
+          setProducts([]);
+          setLoading(false);
+        }
+      });
 
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(q.toLowerCase())
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedType]);
+
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
   );
 
-  const handleAction = (p: Product) => {
+  const handleProductAction = (product: Product) => {
     const token = localStorage.getItem('token');
     if (!token) {
       navigate('/login');
       return;
     }
-    if (p.product_type === 'digital') {
-      setSelProduct(p);
-      setSerialModal(true);
+
+    if (product.product_type === 'digital') {
+      setSelectedProduct(product);
+      setIsSerialModalOpen(true);
     } else {
-      navigate(`/store/product/${p.id}`);
+      navigate(`/store/product/${product.id}`);
     }
   };
 
-  const handleDownload = (e: React.FormEvent) => {
+  const handleCloseModal = () => {
+    setIsSerialModalOpen(false);
+    setSelectedProduct(null);
+    setSerialCode('');
+    setPinCode('');
+  };
+
+  const handleDownloadConfirm = (e: FormEvent) => {
     e.preventDefault();
-    alert(`تحميل ${selProduct?.name}...`);
-    setSerialModal(false);
+    if (!serialCode.trim() || !pinCode.trim()) return;
+
+    alert(`جاري بدء تحميل: ${selectedProduct?.name || 'المنتج'}`);
+    handleCloseModal();
   };
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      <header style={{
-        background: 'var(--grad-primary)', padding: '16px 24px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        color: '#fff',
-      }}>
+      {/* الشريط العلوي */}
+      <header
+        style={{
+          background: 'var(--grad-primary)',
+          padding: '16px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          color: '#ffffff',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Tv style={{ width: 28, height: 28 }} />
           <span style={{ fontSize: 20, fontWeight: 900 }}>SerialCo TV</span>
         </div>
-        <Link to="/login" style={{ color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
+        <Link
+          to="/login"
+          style={{
+            color: '#ffffff',
+            textDecoration: 'none',
+            fontWeight: 600,
+            fontSize: 14,
+          }}
+        >
           دخول / تسجيل
         </Link>
       </header>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
+        {/* شريط البحث */}
         <div style={{ marginBottom: 24 }}>
           <div className="field">
-            <span className="field-icon"><Search /></span>
-            <input className="field-input" placeholder="ابحث عن منتج..." value={q} onChange={e => setQ(e.target.value)} />
+            <span className="field-icon">
+              <Search style={{ width: 18, height: 18 }} />
+            </span>
+            <input
+              className="field-input"
+              placeholder="ابحث عن منتج..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
 
+        {/* أزرار التصفية حسب النوع */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-          {['', 'physical', 'digital'].map(t => (
-            <button key={t} onClick={() => setType(t)} className={type === t ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}>
-              {t === '' ? 'الكل' : t === 'physical' ? 'منتجات مادية' : 'منتجات رقمية'}
+          {[
+            { value: '', label: 'الكل' },
+            { value: 'physical', label: 'منتجات مادية' },
+            { value: 'digital', label: 'منتجات رقمية' },
+          ].map(typeFilter => (
+            <button
+              key={typeFilter.value}
+              type="button"
+              onClick={() => setSelectedType(typeFilter.value)}
+              className={selectedType === typeFilter.value ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
+            >
+              {typeFilter.label}
             </button>
           ))}
         </div>
 
+        {/* قائمة المنتجات */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>جاري التحميل...</div>
+          <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
+            جاري التحميل...
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
+            لا توجد منتجات مطابقة للبحث
+          </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {filtered.map(p => (
-              <div key={p.id} className="card" style={{ padding: 20 }}>
-                <img src={p.image || '/placeholder.jpg'} alt={p.name} style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, marginBottom: 16 }} />
-                <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>{p.name}</div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)', marginBottom: 12 }}>{p.price} ر.س</div>
-                <button onClick={() => handleAction(p)} className="btn btn-primary btn-block">
-                  {p.product_type === 'digital' ? <><Download /> تحميل</> : <><ShoppingCart /> اطلب الآن</>}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 16,
+            }}
+          >
+            {filteredProducts.map(product => (
+              <div key={product.id} className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+                <img
+                  src={product.image || PLACEHOLDER_IMAGE}
+                  alt={product.name}
+                  onError={e => {
+                    (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE;
+                  }}
+                  style={{
+                    width: '100%',
+                    height: 180,
+                    objectFit: 'cover',
+                    borderRadius: 12,
+                    marginBottom: 16,
+                  }}
+                />
+                <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4, flex: 1 }}>
+                  {product.name}
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)', marginBottom: 12 }}>
+                  {product.price} ر.س
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleProductAction(product)}
+                  className="btn btn-primary btn-block"
+                >
+                  {product.product_type === 'digital' ? (
+                    <>
+                      <Download style={{ width: 18, height: 18 }} /> تحميل
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart style={{ width: 18, height: 18 }} /> اطلب الآن
+                    </>
+                  )}
                 </button>
               </div>
             ))}
@@ -112,11 +216,27 @@ export default function PublicProductsPage() {
         )}
       </div>
 
-      <Modal isOpen={serialModal} onClose={() => setSerialModal(false)} title="التحميل يتطلب سيريال">
-        <form onSubmit={handleDownload} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <input className="field-input" placeholder="رقم السيريال" value={serial} onChange={e => setSerial(e.target.value)} required />
-          <input className="field-input" type="password" placeholder="PIN" value={pin} onChange={e => setPin(e.target.value)} required />
-          <button type="submit" className="btn btn-primary btn-block"><Download /> تأكيد التحميل</button>
+      {/* نافذة إدخال السيريال للتحميل */}
+      <Modal isOpen={isSerialModalOpen} onClose={handleCloseModal} title="التحميل يتطلب سيريال">
+        <form onSubmit={handleDownloadConfirm} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <input
+            className="field-input"
+            placeholder="رقم السيريال"
+            value={serialCode}
+            onChange={e => setSerialCode(e.target.value)}
+            required
+          />
+          <input
+            className="field-input"
+            type="password"
+            placeholder="PIN"
+            value={pinCode}
+            onChange={e => setPinCode(e.target.value)}
+            required
+          />
+          <button type="submit" className="btn btn-primary btn-block">
+            <Download style={{ width: 18, height: 18 }} /> تأكيد التحميل
+          </button>
         </form>
       </Modal>
     </div>

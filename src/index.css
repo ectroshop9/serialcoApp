@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
-@theme {
-  --font-cairo: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
-  --color-brand: #6366f1;
-  --color-brand-light: #818cf8;
-  --color-brand-dark: #4f46e5;
+@layer base {
+  @theme {
+    --font-cairo: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+    --color-brand: #6366f1;
+    --color-brand-light: #818cf8;
+    --color-brand-dark: #4f46e5;
+  }
 }
 
 :root {
@@ -350,6 +352,18 @@ input, select, textarea {
 }
 
 /* ===== ANIMATIONS ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  will-change: transform, opacity;
+}
+
+.reveal.is-visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
@@ -449,4 +463,42 @@ input, select, textarea {
   height: 56px;
   margin: 0 auto 16px;
   opacity: 0.4;
+}
+/* ===== LANDING PAGE FIXES ===== */
+.hero-wrapper {
+  background: var(--grad-primary);
+  padding: 60px 16px 80px 16px;
+  text-align: center;
+  color: #ffffff;
+  position: relative;
+}
+
+.search-section {
+  max-width: 800px;
+  margin: -40px auto 40px auto; /* رفع الخانة قليلاً بشكل آمن */
+  position: relative;
+  z-index: 30;
+  padding: 0 16px;
+}
+
+.section-padding {
+  padding: 60px 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.grid-brands {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 16px;
+}
+
+.grid-pricing {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
 }
