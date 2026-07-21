@@ -25,7 +25,6 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // إغلاق القوائم عند النقر خارجها
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setShowUserMenu(false);
@@ -51,6 +50,12 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
       navigate(`/firmware?search=${encodeURIComponent(searchVal)}`);
       setSearchVal('');
     }
+  };
+
+  const getInitials = () => {
+    const first = user?.name?.charAt(0) || 'ف';
+    const last = user?.name?.split(' ')[1]?.charAt(0) || '';
+    return `${first}${last}`;
   };
 
   const iconBtnStyle: React.CSSProperties = {
@@ -83,18 +88,10 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
             <Menu style={{ width: 22, height: 22 }} />
           </button>
 
-          {/* Desktop Search */}
           <form onSubmit={handleSearch} className={`${showSearch ? 'flex' : 'hidden'} md:flex`}>
             <div className="field">
               <span className="field-icon"><Search /></span>
-              <input
-                type="text"
-                placeholder="بحث سريع..."
-                className="field-input"
-                style={{ width: 260 }}
-                value={searchVal}
-                onChange={e => setSearchVal(e.target.value)}
-              />
+              <input type="text" placeholder="بحث سريع..." className="field-input" style={{ width: 260 }} value={searchVal} onChange={e => setSearchVal(e.target.value)} />
             </div>
           </form>
 
@@ -105,12 +102,10 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
 
         {/* Left */}
         <div className="row">
-          {/* Fullscreen */}
           <button onClick={toggleFullscreen} title="ملء الشاشة" style={{ ...iconBtnStyle, color: 'var(--text-secondary)' }}>
             {isFullscreen ? <Minimize style={{ width: 20, height: 20 }} /> : <Maximize style={{ width: 20, height: 20 }} />}
           </button>
 
-          {/* Theme */}
           <button onClick={toggleTheme} title={isDark ? 'الوضع النهاري' : 'الوضع الليلي'}
             style={{ ...iconBtnStyle, background: isDark ? 'rgba(251,191,36,0.1)' : 'rgba(99,102,241,0.08)', color: isDark ? '#fbbf24' : '#6366f1' }}>
             {isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}
@@ -133,9 +128,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
                   { title: 'تحديث النظام', desc: 'ميزات جديدة متاحة', time: 'منذ يوم' },
                 ].map((n, i) => (
                   <div key={i} className="row" style={{ padding: '10px 14px', gap: 12, borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }}>
-                    <div className="icon-box icon-box-sm" style={{ background: 'var(--grad-primary)', flexShrink: 0 }}>
-                      <Bell style={{ width: 14, height: 14 }} />
-                    </div>
+                    <div className="icon-box icon-box-sm" style={{ background: 'var(--grad-primary)', flexShrink: 0 }}><Bell style={{ width: 14, height: 14 }} /></div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: 600 }}>{n.title}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.desc}</div>
@@ -149,15 +142,24 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
 
           <div style={{ width: 1, height: 28, background: 'var(--border)', margin: '0 4px' }} />
 
-          {/* User Menu */}
+          {/* User Avatar فقط بدون اسم */}
           <div ref={userMenuRef} style={{ position: 'relative' }}>
-            <div className="row" style={{ gap: 10, cursor: 'pointer' }} onClick={() => setShowUserMenu(!showUserMenu)}>
-              <div className="hidden sm:block" style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>{user?.name}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.3 }}>{user?.plan}</div>
-              </div>
-              <div className="icon-box icon-box-md" style={{ background: 'var(--grad-primary)', fontSize: 14, fontWeight: 800, borderRadius: 12 }}>
-                {user?.name?.charAt(0)}
+            <div onClick={() => setShowUserMenu(!showUserMenu)} style={{ cursor: 'pointer' }}>
+              <div
+                style={{
+                  background: 'var(--grad-primary)',
+                  borderRadius: '50%',
+                  width: 40,
+                  height: 40,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 15,
+                  fontWeight: 900,
+                  color: '#fff',
+                }}
+              >
+                {getInitials()}
               </div>
             </div>
 

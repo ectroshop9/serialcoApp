@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { firmwareData, brands, type Firmware } from '../data/mockData';
 import Modal from '../components/UI/Modal';
-import { Search, Filter, Download, Eye, X, ChevronUp, ChevronDown, RotateCw } from 'lucide-react';
+import { Search, Filter, Download, Eye, X, ChevronUp, ChevronDown, RotateCw, Coins } from 'lucide-react';
 
 function useToast() {
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -53,7 +53,6 @@ export default function FirmwarePage() {
 
   const { sorted, field, dir, toggle } = useSort(filtered, 'brand');
   const { slice, page, total, setPage } = usePagination(sorted);
-
   useEffect(() => { setPage(1); }, [q, brand]);
 
   const dl = (fw: Firmware) => { setSel(fw); setOpen(true); setSerial(''); setPin(''); setStarted(false); };
@@ -62,7 +61,7 @@ export default function FirmwarePage() {
     e.preventDefault();
     setStarted(true);
     setTimeout(() => {
-      show(`تم تحميل ${sel?.model} بنجاح`);
+      show(`تم استخدام التوكن لـ ${sel?.model}`);
       setOpen(false);
     }, 2000);
   };
@@ -121,7 +120,7 @@ export default function FirmwarePage() {
                 <th><SortBtn f="model" label="الموديل" /></th>
                 <th className="hidden md:table-cell"><SortBtn f="version" label="الإصدار" /></th>
                 <th className="hidden lg:table-cell">النوع</th>
-                <th className="hidden sm:table-cell"><SortBtn f="size" label="الحجم" /></th>
+                <th className="hidden sm:table-cell"><SortBtn f="size" label="التوكن" /></th>
                 <th className="hidden lg:table-cell"><SortBtn f="downloads" label="التحميلات" /></th>
                 <th style={{ textAlign: 'center' }}>إجراء</th>
               </tr>
@@ -135,12 +134,14 @@ export default function FirmwarePage() {
                   <td className="hidden lg:table-cell">
                     <span className="badge" style={{ background: fw.type === 'Full Dump' ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)', color: fw.type === 'Full Dump' ? '#f59e0b' : '#10b981' }}>{fw.type}</span>
                   </td>
-                  <td className="hidden sm:table-cell" style={{ color: 'var(--text-secondary)' }}>{fw.size}</td>
+                  <td className="hidden sm:table-cell" style={{ color: 'var(--primary)', fontWeight: 700 }}>
+                    <Coins style={{ width: 14, height: 14, marginLeft: 4 }} />{fw.size}
+                  </td>
                   <td className="hidden lg:table-cell">
                     <div className="row-tight" style={{ color: 'var(--text-muted)', fontSize: 13 }}><Eye style={{ width: 14, height: 14 }} /> {fw.downloads}</div>
                   </td>
                   <td style={{ textAlign: 'center' }}>
-                    <button onClick={() => dl(fw)} className="btn btn-primary btn-sm"><Download /> تحميل</button>
+                    <button onClick={() => dl(fw)} className="btn btn-primary btn-sm"><Download /> استخدام التوكن</button>
                   </td>
                 </tr>
               )) : (
@@ -164,12 +165,12 @@ export default function FirmwarePage() {
         )}
       </div>
 
-      <Modal isOpen={open} onClose={() => setOpen(false)} title="تحميل السوفتوير">
+      <Modal isOpen={open} onClose={() => setOpen(false)} title="استخدام التوكن">
         {sel && (
           <div>
             <div style={{ background: 'var(--bg-primary)', borderRadius: 12, padding: 16, marginBottom: 20, border: '1px solid var(--border)' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px', fontSize: 13 }}>
-                {[['الماركة', sel.brand], ['الموديل', sel.model], ['الحجم', sel.size], ['النوع', sel.type]].map(([l, v]) => (
+                {[['الماركة', sel.brand], ['الموديل', sel.model], ['التوكن', sel.size], ['النوع', sel.type]].map(([l, v]) => (
                   <div key={l}><span style={{ color: 'var(--text-muted)' }}>{l}: </span><strong style={{ color: 'var(--text-primary)' }}>{v}</strong></div>
                 ))}
               </div>
@@ -185,15 +186,15 @@ export default function FirmwarePage() {
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>رمز البين (PIN)</label>
                   <input className="field-input" style={{ paddingRight: 16 }} type="password" value={pin} onChange={e => setPin(e.target.value)} placeholder="أدخل رمز البين" required />
                 </div>
-                <button type="submit" className="btn btn-primary btn-block"><Download /> تأكيد وتحميل</button>
+                <button type="submit" className="btn btn-primary btn-block"><Coins /> استخدام التوكن</button>
               </form>
             ) : (
               <div style={{ textAlign: 'center', padding: 16 }}>
                 <div style={{ width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px', background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Download style={{ width: 28, height: 28, color: '#10b981', animation: 'float 1s ease-in-out infinite' }} />
+                  <Coins style={{ width: 28, height: 28, color: '#10b981', animation: 'float 1s ease-in-out infinite' }} />
                 </div>
-                <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>جاري التحميل...</div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>سيبدأ التحميل تلقائياً خلال لحظات</div>
+                <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>جاري خصم التوكن...</div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>سيتم خصم التوكن من رصيدك</div>
                 <div style={{ width: '100%', height: 8, borderRadius: 10, background: 'var(--bg-primary)', overflow: 'hidden' }}>
                   <div style={{ width: '65%', height: '100%', borderRadius: 10, background: 'var(--grad-success)', animation: 'pulseGlow 1.5s infinite' }} />
                 </div>

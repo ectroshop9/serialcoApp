@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { schematicsData, brands, type Schematic } from '../data/mockData';
 import Modal from '../components/UI/Modal';
-import { Search, Filter, Download, FileText, Eye, X, Zap, Cpu, Monitor } from 'lucide-react';
+import { Search, Filter, FileText, Eye, X, Zap, Cpu, Monitor, Coins } from 'lucide-react';
 
 const cats = [
   { value: '', label: 'جميع التصنيفات', icon: FileText },
@@ -41,20 +41,14 @@ export default function SchematicsPage() {
         <p className="page-desc">مخططات كهربائية للتلفزيونات — باور سبلاي، مين بورد، تي-كون</p>
       </div>
 
-      {/* Category tabs */}
       <div className="anim-fade-up" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {cats.map(c => (
-          <button
-            key={c.value}
-            onClick={() => setCat(c.value)}
-            className={cat === c.value ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
-          >
+          <button key={c.value} onClick={() => setCat(c.value)} className={cat === c.value ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}>
             <c.icon /> {c.label}
           </button>
         ))}
       </div>
 
-      {/* Filters */}
       <div className="card anim-fade-up" style={{ padding: 20 }}>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div className="field" style={{ flex: '1 1 250px' }}>
@@ -69,9 +63,7 @@ export default function SchematicsPage() {
             </select>
           </div>
           {(q || brand || cat) && (
-            <button onClick={() => { setQ(''); setBrand(''); setCat(''); }} className="btn btn-ghost btn-sm" style={{ color: '#ef4444' }}>
-              <X /> مسح
-            </button>
+            <button onClick={() => { setQ(''); setBrand(''); setCat(''); }} className="btn btn-ghost btn-sm" style={{ color: '#ef4444' }}><X /> مسح</button>
           )}
         </div>
       </div>
@@ -80,7 +72,6 @@ export default function SchematicsPage() {
         عدد النتائج: <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>
       </div>
 
-      {/* Table */}
       <div className="card anim-fade-up">
         <div className="table-wrap">
           <table className="tbl">
@@ -89,7 +80,7 @@ export default function SchematicsPage() {
                 <th>العنوان</th>
                 <th className="hidden sm:table-cell">التصنيف</th>
                 <th className="hidden md:table-cell">الموديل</th>
-                <th className="hidden lg:table-cell">الحجم</th>
+                <th className="hidden lg:table-cell">التوكن</th>
                 <th className="hidden lg:table-cell">التحميلات</th>
                 <th style={{ textAlign: 'center' }}>إجراء</th>
               </tr>
@@ -104,16 +95,14 @@ export default function SchematicsPage() {
                       <span className="badge" style={{ background: cc?.[0], color: cc?.[1] }}>{catLabel[s.category]}</span>
                     </td>
                     <td className="hidden md:table-cell" style={{ color: 'var(--text-secondary)' }}>{s.model}</td>
-                    <td className="hidden lg:table-cell" style={{ color: 'var(--text-secondary)' }}>{s.size}</td>
+                    <td className="hidden lg:table-cell" style={{ color: 'var(--accent)', fontWeight: 700 }}>
+                      <Coins style={{ width: 14, height: 14, marginLeft: 4 }} />{s.size}
+                    </td>
                     <td className="hidden lg:table-cell">
-                      <div className="row-tight" style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-                        <Eye style={{ width: 14, height: 14 }} /> {s.downloads}
-                      </div>
+                      <div className="row-tight" style={{ color: 'var(--text-muted)', fontSize: 13 }}><Eye style={{ width: 14, height: 14 }} /> {s.downloads}</div>
                     </td>
                     <td style={{ textAlign: 'center' }}>
-                      <button onClick={() => dl(s)} className="btn btn-success btn-sm">
-                        <Download /> تحميل
-                      </button>
+                      <button onClick={() => dl(s)} className="btn btn-success btn-sm"><Coins /> استخدام التوكن</button>
                     </td>
                   </tr>
                 );
@@ -131,15 +120,14 @@ export default function SchematicsPage() {
         )}
       </div>
 
-      {/* Modal */}
-      <Modal isOpen={open} onClose={() => setOpen(false)} title="تحميل المخطط">
+      <Modal isOpen={open} onClose={() => setOpen(false)} title="استخدام التوكن">
         {sel && (
           <div>
             <div style={{ background: 'var(--bg-primary)', borderRadius: 12, padding: 16, marginBottom: 20, border: '1px solid var(--border)' }}>
               <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', marginBottom: 8 }}>{sel.title}</div>
               <div style={{ display: 'flex', gap: 20, fontSize: 12 }}>
                 <span style={{ color: 'var(--text-muted)' }}>الموديل: <b style={{ color: 'var(--text-primary)' }}>{sel.model}</b></span>
-                <span style={{ color: 'var(--text-muted)' }}>الحجم: <b style={{ color: 'var(--text-primary)' }}>{sel.size}</b></span>
+                <span style={{ color: 'var(--text-muted)' }}>التوكن: <b style={{ color: 'var(--accent)' }}>{sel.size}</b></span>
               </div>
             </div>
 
@@ -153,15 +141,15 @@ export default function SchematicsPage() {
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>رمز البين (PIN)</label>
                   <input className="field-input" style={{ paddingRight: 16 }} type="password" value={pin} onChange={e => setPin(e.target.value)} placeholder="أدخل رمز البين" required />
                 </div>
-                <button type="submit" className="btn btn-success btn-block"><Download /> تأكيد وتحميل</button>
+                <button type="submit" className="btn btn-success btn-block"><Coins /> خصم التوكن والتحميل</button>
               </form>
             ) : (
               <div style={{ textAlign: 'center', padding: 16 }}>
                 <div style={{ width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px', background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Download style={{ width: 28, height: 28, color: '#10b981', animation: 'float 1s ease-in-out infinite' }} />
+                  <Coins style={{ width: 28, height: 28, color: '#10b981', animation: 'float 1s ease-in-out infinite' }} />
                 </div>
-                <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>جاري التحميل...</div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>سيبدأ التحميل تلقائياً خلال لحظات</div>
+                <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>جاري خصم التوكن...</div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>سيتم الخصم من رصيدك</div>
               </div>
             )}
           </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Modal from '../components/UI/Modal';
-import { Search, Download, ShoppingCart, Tv } from 'lucide-react';
+import { Search, ShoppingCart,  Coins } from 'lucide-react';
 
 interface Product {
   id: number;
@@ -10,6 +10,7 @@ interface Product {
   product_type: 'physical' | 'digital';
   image: string | null;
   description?: string;
+  token_cost?: number;
 }
 
 const API_BASE_URL = 'https://serialcotv.onrender.com/api/store';
@@ -65,14 +66,13 @@ export default function PublicProductsPage() {
   const handleDownloadConfirm = (e: FormEvent) => {
     e.preventDefault();
     if (!serialCode.trim() || !pinCode.trim()) return;
-    alert(`جاري بدء تحميل: ${selectedProduct?.name || 'المنتج'}`);
+    alert(`تم خصم ${selectedProduct?.token_cost || 500} توكن - جاري التحميل: ${selectedProduct?.name || 'المنتج'}`);
     handleCloseModal();
   };
 
   return (
     <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', direction: 'rtl', minHeight: '100vh' }}>
       
-      {/* Navbar موحد */}
       <nav className="glass sticky top-0 z-50" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', padding: '10px 16px' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link to="/" style={{ textDecoration: 'none' }}>
@@ -85,7 +85,6 @@ export default function PublicProductsPage() {
       </nav>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
-        {/* Search */}
         <div style={{ marginBottom: 24 }}>
           <div className="field">
             <span className="field-icon"><Search style={{ width: 18, height: 18 }} /></span>
@@ -93,7 +92,6 @@ export default function PublicProductsPage() {
           </div>
         </div>
 
-        {/* Filters */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
           {[{ value: '', label: 'الكل' }, { value: 'physical', label: 'منتجات مادية' }, { value: 'digital', label: 'منتجات رقمية' }].map(f => (
             <button key={f.value} type="button" onClick={() => setSelectedType(f.value)}
@@ -103,7 +101,6 @@ export default function PublicProductsPage() {
           ))}
         </div>
 
-        {/* Products Grid */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>جاري التحميل...</div>
         ) : filteredProducts.length === 0 ? (
@@ -119,9 +116,15 @@ export default function PublicProductsPage() {
                   onError={e => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE; }}
                   style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, marginBottom: 16 }} />
                 <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>{product.name}</div>
+                {product.product_type === 'digital' && product.token_cost && (
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Coins style={{ width: 16, height: 16 }} />
+                    {product.token_cost.toLocaleString()} توكن
+                  </div>
+                )}
                 <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)', marginBottom: 12 }}>{product.price} ر.س</div>
                 <button type="button" onClick={() => handleProductAction(product)} className="btn btn-primary btn-block">
-                  {product.product_type === 'digital' ? <><Download /> تحميل</> : <><ShoppingCart /> اطلب الآن</>}
+                  {product.product_type === 'digital' ? <><Coins /> استخدام التوكن</> : <><ShoppingCart /> اطلب الآن</>}
                 </button>
               </div>
             ))}
@@ -129,12 +132,11 @@ export default function PublicProductsPage() {
         )}
       </div>
 
-      {/* Serial Modal */}
-      <Modal isOpen={isSerialModalOpen} onClose={handleCloseModal} title="التحميل يتطلب سيريال">
+      <Modal isOpen={isSerialModalOpen} onClose={handleCloseModal} title="استخدام التوكن">
         <form onSubmit={handleDownloadConfirm} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <input className="field-input" placeholder="رقم السيريال" value={serialCode} onChange={e => setSerialCode(e.target.value)} required />
           <input className="field-input" type="password" placeholder="PIN" value={pinCode} onChange={e => setPinCode(e.target.value)} required />
-          <button type="submit" className="btn btn-primary btn-block"><Download /> تأكيد التحميل</button>
+          <button type="submit" className="btn btn-primary btn-block"><Coins /> خصم التوكن والتحميل</button>
         </form>
       </Modal>
 

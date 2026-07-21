@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
-  LayoutDashboard, FileText, Wrench, User, LogOut, ShoppingCart, Key, Bell, X, Tv
+  LayoutDashboard, FileText, Wrench, User, LogOut, ShoppingCart, Key, Bell, X
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -23,7 +23,7 @@ const menuItems = [
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     onClose();
@@ -36,6 +36,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     } catch (error) {
       console.error('فشل تسجيل الخروج:', error);
     }
+  };
+
+  const getInitials = () => {
+    const first = user?.name?.charAt(0) || 'S';
+    const last = user?.name?.split(' ')[1]?.charAt(0) || 'C';
+    return `${first}${last}`;
   };
 
   return (
@@ -64,8 +70,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           className="row-between"
         >
           <NavLink to="/dashboard" className="row cursor-pointer" style={{ textDecoration: 'none' }}>
-            <div className="icon-box icon-box-md" style={{ background: 'var(--grad-primary)' }}>
-              <Tv style={{ width: 22, height: 22, color: '#fff' }} />
+            <div
+              style={{
+                background: 'var(--grad-primary)',
+                borderRadius: '50%',
+                width: 44,
+                height: 44,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <span style={{ color: '#fff', fontWeight: 900, fontSize: 16 }}>
+                {getInitials()}
+              </span>
             </div>
             <div>
               <div style={{ fontSize: 17, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>

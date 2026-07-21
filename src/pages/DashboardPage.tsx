@@ -2,20 +2,16 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import StatCard from '../components/UI/StatCard';
-import { Download, TrendingUp, Star, Eye, EyeOff } from 'lucide-react';
+import { Coins, TrendingUp, Star, Eye, EyeOff } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
-  
-  // حالة التحكم بإخفاء/إظهار كود السيريال
   const [showSerial, setShowSerial] = useState(false);
 
-  // التحقق من تسجيل الدخول
   if (!isAuthenticated || !user) {
     return <Navigate to="/" replace />;
   }
 
-  // دالة تشفيـر/إخفاء كود السيريال ترجع نصاً (string) لتعمل مع StatCard بدون أخطاء
   const formatSerial = (code?: string) => {
     if (!code) return '-';
     if (showSerial) return code;
@@ -23,7 +19,6 @@ export default function DashboardPage() {
     return `••••-••••-${code.slice(-4)}`;
   };
 
-  // استخراج الاسم الأول بأمان
   const firstName = user.name?.trim() ? user.name.trim().split(' ')[0] : 'ضيف';
 
   return (
@@ -55,55 +50,50 @@ export default function DashboardPage() {
       <div className="stagger" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: 12, 
+        gap: 12,
       }}>
-        <StatCard 
-          icon={<Download style={{ width: 20, height: 20 }} />} 
-          label="التحميلات المتبقية" 
-          value={user.remainingDownloads ?? 0} 
-          subtitle="من أصل 200 تحميل" 
-          gradient="var(--grad-primary)" 
+        <StatCard
+          icon={<Coins style={{ width: 20, height: 20 }} />}
+          label="التوكن المتبقي"
+          value={(user.remainingDownloads ?? 0).toLocaleString()}
+          subtitle={`من أصل ${(user.totalDownloads ?? 0).toLocaleString()} توكن`}
+          gradient="var(--grad-primary)"
         />
-        
-        <StatCard 
-          icon={<TrendingUp style={{ width: 20, height: 20 }} />} 
-          label="إجمالي التحميلات" 
-          value={user.totalDownloads ?? 0} 
-          subtitle="منذ الاشتراك" 
-          gradient="var(--grad-success)" 
+
+        <StatCard
+          icon={<TrendingUp style={{ width: 20, height: 20 }} />}
+          label="إجمالي التوكن المستخدم"
+          value={(user.totalDownloads ?? 0).toLocaleString()}
+          subtitle="منذ الاشتراك"
+          gradient="var(--grad-success)"
         />
-        
-        <StatCard 
+
+        <StatCard
           icon={
             <button
               type="button"
               onClick={() => setShowSerial(!showSerial)}
               style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                color: 'inherit',
-                display: 'flex',
-                alignItems: 'center'
+                background: 'none', border: 'none', padding: 0,
+                cursor: 'pointer', color: 'inherit', display: 'flex', alignItems: 'center'
               }}
               title={showSerial ? "إخفاء الكود" : "إظهار الكود"}
             >
               {showSerial ? <EyeOff style={{ width: 20, height: 20 }} /> : <Eye style={{ width: 20, height: 20 }} />}
             </button>
-          } 
-          label="كود السيريال" 
-          value={formatSerial(user.serialCode)} 
-          subtitle={showSerial ? "اضغط أيقونة العين للإخفاء" : "اضغط أيقونة العين للإظهار"} 
-          gradient="var(--grad-accent)" 
+          }
+          label="كود السيريال"
+          value={formatSerial(user.serialCode)}
+          subtitle={showSerial ? "اضغط للإخفاء" : "اضغط للإظهار"}
+          gradient="var(--grad-accent)"
         />
-        
-        <StatCard 
-          icon={<Star style={{ width: 20, height: 20 }} />} 
-          label="الباقة الحالية" 
-          value={user.plan || 'غير محدد'} 
-          subtitle="اشتراك سنوي" 
-          gradient="var(--grad-info)" 
+
+        <StatCard
+          icon={<Star style={{ width: 20, height: 20 }} />}
+          label="الباقة الحالية"
+          value={user.plan || 'غير محدد'}
+          subtitle="اشتراك سنوي"
+          gradient="var(--grad-info)"
         />
       </div>
     </div>

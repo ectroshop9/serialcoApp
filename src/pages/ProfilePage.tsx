@@ -4,9 +4,9 @@ import { downloadHistory, storeOrders } from '../data/mockData';
 import StatCard from '../components/UI/StatCard';
 import Modal from '../components/UI/Modal';
 import {
-  User, Download, ShoppingCart, Key, Search, Plus, CheckCircle, X,
+  User,  ShoppingCart, Key, Search, Plus, CheckCircle, X,
   Clock, Truck, Package, AlertCircle, Mail, Phone, Calendar, Shield, Star,
-  Copy, RotateCw, ChevronUp, ChevronDown, Lock, Eye, EyeOff, LucideIcon
+  Copy, RotateCw, ChevronUp, ChevronDown, Lock, Eye, EyeOff, Coins, TrendingUp, LucideIcon
 } from 'lucide-react';
 
 interface ToastState {
@@ -178,7 +178,7 @@ export default function ProfilePage() {
       <div className="row-between anim-fade-up">
         <div>
           <h1 className="page-title">حسابي</h1>
-          <p className="page-desc">إدارة حسابك والسيريالات والتحميلات</p>
+          <p className="page-desc">إدارة حسابك والتوكن والسيريالات</p>
         </div>
         <div className="row" style={{ gap: 8 }}>
           <button type="button" onClick={refresh} className="btn btn-ghost btn-sm" aria-label="تحديث">
@@ -231,7 +231,7 @@ export default function ProfilePage() {
       <div className="anim-fade-up" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {[
           { key: 'info', label: 'معلوماتي', Icon: User },
-          { key: 'downloads', label: 'التحميلات', Icon: Download },
+          { key: 'downloads', label: 'سجل التوكن', Icon: Coins },
           { key: 'serial', label: 'السيريال', Icon: Key },
           { key: 'orders', label: 'الطلبات', Icon: ShoppingCart },
           { key: 'password', label: 'كلمة المرور', Icon: Lock },
@@ -303,16 +303,16 @@ export default function ProfilePage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <StatCard
-                icon={<Download style={{ width: 24, height: 24 }} />}
-                label="التحميلات المتبقية"
-                value={user?.remainingDownloads || 0}
-                subtitle="من أصل 200"
+                icon={<Coins style={{ width: 24, height: 24 }} />}
+                label="التوكن المتبقي"
+                value={(user?.remainingDownloads || 0).toLocaleString()}
+                subtitle={`من أصل ${(user?.totalDownloads || 0).toLocaleString()}`}
                 gradient="var(--grad-primary)"
               />
               <StatCard
-                icon={<Shield style={{ width: 24, height: 24 }} />}
-                label="إجمالي التحميلات"
-                value={user?.totalDownloads || 0}
+                icon={<TrendingUp style={{ width: 24, height: 24 }} />}
+                label="إجمالي التوكن المستخدم"
+                value={(user?.totalDownloads || 0).toLocaleString()}
                 subtitle="منذ الاشتراك"
                 gradient="var(--grad-success)"
               />
@@ -321,7 +321,7 @@ export default function ProfilePage() {
         )
       )}
 
-      {/* تبويب: التحميلات */}
+      {/* تبويب: سجل التوكن */}
       {tab === 'downloads' && (
         <div className="card anim-fade-up">
           <div
@@ -374,7 +374,7 @@ export default function ProfilePage() {
                   </th>
                   <th className="hidden sm:table-cell">النوع</th>
                   <th className="hidden md:table-cell">
-                    الحجم{' '}
+                    التوكن{' '}
                     <button
                       type="button"
                       onClick={() => toggle('size')}
@@ -429,7 +429,7 @@ export default function ProfilePage() {
                         </span>
                       </td>
                       <td className="hidden md:table-cell" style={{ color: 'var(--text-secondary)' }}>
-                        {item.size}
+                        {item.size} توكن
                       </td>
                       <td style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{item.date}</td>
                     </tr>
@@ -551,13 +551,13 @@ export default function ProfilePage() {
               <div style={{ background: 'var(--bg-primary)', borderRadius: 12, padding: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>المتبقي</div>
                 <div style={{ fontSize: 28, fontWeight: 900, color: '#10b981' }}>
-                  {user?.remainingDownloads || 0}
+                  {(user?.remainingDownloads || 0).toLocaleString()}
                 </div>
               </div>
               <div style={{ background: 'var(--bg-primary)', borderRadius: 12, padding: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>المستخدم</div>
                 <div style={{ fontSize: 28, fontWeight: 900, color: '#6366f1' }}>
-                  {user?.totalDownloads || 0}
+                  {(user?.totalDownloads || 0).toLocaleString()}
                 </div>
               </div>
             </div>
@@ -585,9 +585,9 @@ export default function ProfilePage() {
             <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 16 }}>ملاحظات</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
-                { Icon: AlertCircle, t: 'كل سيريال يحتوي على عدد محدد من التحميلات', c: '#f59e0b' },
+                { Icon: AlertCircle, t: 'كل سيريال يحتوي على عدد محدد من التوكن', c: '#f59e0b' },
                 { Icon: Shield, t: 'لا يمكن استخدام نفس السيريال على أكثر من جهاز', c: '#6366f1' },
-                { Icon: CheckCircle, t: 'يمكنك إضافة سيريال جديد لزيادة رصيد التحميلات', c: '#10b981' },
+                { Icon: CheckCircle, t: 'يمكنك إضافة سيريال جديد لزيادة رصيد التوكن', c: '#10b981' },
                 { Icon: Key, t: 'احتفظ بكود السيريال في مكان آمن', c: '#ef4444' },
               ].map((tip, idx) => (
                 <div
@@ -738,11 +738,11 @@ export default function ProfilePage() {
         </form>
       </Modal>
 
-      <Modal isOpen={checkModal} onClose={() => setCheckModal(false)} title="فحص رصيد سيريال" size="sm">
+      <Modal isOpen={checkModal} onClose={() => setCheckModal(false)} title="فحص رصيد توكن" size="sm">
         <form
           onSubmit={e => {
             e.preventDefault();
-            setResult({ balance: 47 });
+            setResult({ balance: 47000 });
           }}
           style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
         >
@@ -776,7 +776,7 @@ export default function ProfilePage() {
             <CheckCircle style={{ width: 40, height: 40, color: '#10b981', margin: '0 auto 10px' }} />
             <div style={{ fontWeight: 800, marginBottom: 6 }}>السيريال صالح</div>
             <div style={{ fontSize: 28, fontWeight: 900, color: '#10b981' }}>
-              {result.balance} تحميل متبقي
+              {result.balance.toLocaleString()} توكن متبقي
             </div>
           </div>
         )}
