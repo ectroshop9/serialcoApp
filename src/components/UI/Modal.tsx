@@ -1,81 +1,97 @@
-import { type ReactNode, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
-  children: ReactNode;
-  size?: 'sm' | 'md' | 'lg';
+  title?: string;
+  children: React.ReactNode;
 }
 
-export default function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
   useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const maxW = size === 'sm' ? 400 : size === 'lg' ? 640 : 520;
-
   return (
-    <div
-      onClick={onClose}
+    <div 
       style={{
-        position: 'fixed', inset: 0, zIndex: 60,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 16,
-      }}
-    >
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'rgba(0,0,0,0.55)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(15, 23, 42, 0.75)',
         backdropFilter: 'blur(4px)',
-      }} />
-
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="anim-scale-in"
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        direction: 'rtl'
+      }}
+      onClick={onClose}
+    >
+      <div 
         style={{
-          position: 'relative',
+          background: 'var(--bg-secondary, #1e293b)',
+          color: 'var(--text-primary, #f8fafc)',
+          borderRadius: '16px',
+          border: '1px solid var(--border, #334155)',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3)',
           width: '100%',
-          maxWidth: maxW,
-          background: 'var(--bg-card)',
-          borderRadius: 20,
-          border: '1px solid var(--border)',
-          boxShadow: '0 24px 48px rgba(0,0,0,0.2)',
+          maxWidth: '480px',
           overflow: 'hidden',
+          animation: 'modalFadeIn 0.2s ease-out'
         }}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div
-          className="row-between"
-          style={{
-            padding: '18px 24px',
-            borderBottom: '1px solid var(--border)',
-          }}
-        >
-          <h3 style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)' }}>
-            {title}
+        {/* Modal Header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 20px',
+          borderBottom: '1px solid var(--border, #334155)'
+        }}>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+            {title || 'تأكيد العملية'}
           </h3>
-          <button
+          <button 
             onClick={onClose}
             style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: 32, height: 32, borderRadius: 8,
-              color: '#ef4444', transition: 'background 0.2s',
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary, #94a3b8)',
+              cursor: 'pointer',
+              padding: '4px',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.2s'
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239,68,68,0.1)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
           >
-            <X style={{ width: 18, height: 18 }} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* Body */}
-        <div style={{ padding: '24px' }}>
+        {/* Modal Body */}
+        <div style={{ padding: '20px' }}>
           {children}
         </div>
       </div>
