@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { Key, Plus, Search, CheckCircle } from 'lucide-react';
+import { Plus, Search, CheckCircle } from 'lucide-react';
+
+const API = 'https://serialcotv.onrender.com';
 
 export default function SerialsPage() {
-  const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [serialInput, setSerialInput] = useState('');
   const [pinInput, setPinInput] = useState('');
@@ -17,7 +17,7 @@ export default function SerialsPage() {
 
   const fetchProfile = async () => {
     const token = localStorage.getItem('access_token');
-    const res = await fetch('/api/accounts/profile/', { headers: { 'Authorization': `Bearer ${token}` } });
+    const res = await fetch(`${API}/api/accounts/profile/`, { headers: { 'Authorization': `Bearer ${token}` } });
     const data = await res.json();
     if (data.success) setProfile(data.customer);
   };
@@ -26,7 +26,7 @@ export default function SerialsPage() {
     e.preventDefault();
     setLoading(true);
     const token = localStorage.getItem('access_token');
-    const res = await fetch('/api/accounts/link-serial/', {
+    const res = await fetch(`${API}/api/accounts/link-serial/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ serial_number: serialInput, pin: pinInput })
@@ -40,7 +40,7 @@ export default function SerialsPage() {
 
   const checkSerial = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('/api/serials/check/', {
+    const res = await fetch(`${API}/api/serials/check/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ serial_number: checkSerialInput, pin: checkPinInput })
