@@ -8,7 +8,6 @@ interface Product {
   price: string;
   product_type: 'physical' | 'digital';
   image: string | null;
-  category__name?: string;
   token_cost?: number;
 }
 
@@ -59,7 +58,7 @@ export default function ProductsPage() {
       <div className="field" style={{ maxWidth: 400 }}>
         <span className="field-icon"><Search /></span>
         <input className="field-input" placeholder="بحث..." value={q} onChange={e => setQ(e.target.value)} />
-        {q && <button onClick={() => setQ('')} style={{ position: 'absolute', left: 12 }}><X /></button>}
+        {q && <button onClick={() => setQ('')}><X /></button>}
       </div>
 
       {filtered.length === 0 ? (
@@ -69,8 +68,8 @@ export default function ProductsPage() {
           {filtered.map(p => (
             <div key={p.id} className="card" style={{ padding: 20 }}>
               <img src={p.image || '/placeholder.jpg'} alt={p.name} style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, marginBottom: 16 }} />
-              <h3 style={{ fontSize: 16, fontWeight: 800 }}>{p.name}</h3>
-              {p.token_cost && <div style={{ color: 'var(--accent)' }}><Coins /> {p.token_cost} توكن</div>}
+              <h3>{p.name}</h3>
+              {p.token_cost && <div><Coins /> {p.token_cost} توكن</div>}
               <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)', marginBottom: 16 }}>{p.price} ر.س</div>
               <button onClick={() => navigate(`/store/product/${p.id}`)} className="btn btn-primary btn-block">
                 {p.product_type === 'digital' ? <><Coins /> استخدام التوكن</> : <><ShoppingCart /> اطلب الآن</>}
