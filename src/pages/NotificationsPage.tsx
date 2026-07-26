@@ -1,26 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Cpu, FileText, Package, Info, CheckCheck, Trash2, BellOff } from 'lucide-react';
 
-// تحديد هيكل بيانات الإشعار ليكون متوافقاً مع API المستقبلي
 export interface NotificationItem {
   id: number;
-  type: 'firmware' | 'schematic' | 'product' | 'system';
+  type: 'firmware' | 'schematic' | 'product' | 'system' | 'update' | 'info';
   title: string;
-  desc: string;
-  time: string;
-  read: boolean;
+  description: string;
+  created_at: string;
+  is_read: boolean;
 }
 
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  { id: 1, type: 'firmware', title: 'سوفتوير جديد', desc: 'Samsung UA32T5300 v2.5 متاح للتحميل', time: 'منذ ساعتين', read: false },
-  { id: 2, type: 'schematic', title: 'مخطط جديد', desc: 'LG EAY64928801 Power Supply تمت إضافته', time: 'منذ 5 ساعات', read: false },
-  { id: 3, type: 'product', title: 'منتج جديد في المتجر', desc: 'مبرمجة RT809H متوفرة الآن', time: 'منذ يوم', read: true },
-  { id: 4, type: 'system', title: 'تحديث النظام', desc: 'تمت إضافة ميزات جديدة للوحة التحكم', time: 'منذ يومين', read: true },
-  { id: 5, type: 'firmware', title: 'سوفتوير جديد', desc: 'TCL 43P635 - Google TV متاح للتحميل', time: 'منذ 3 أيام', read: true },
-  { id: 6, type: 'schematic', title: 'مخطط جديد', desc: 'Samsung BN94-12871A Main Board', time: 'منذ أسبوع', read: true },
-];
-
-// دالة مساعدة لاختيار التنسيق والأيقونة بناءً على نوع الإشعار
 const getNotificationConfig = (type: NotificationItem['type']) => {
   switch (type) {
     case 'firmware':
@@ -30,36 +19,78 @@ const getNotificationConfig = (type: NotificationItem['type']) => {
     case 'product':
       return { icon: Package, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' };
     case 'system':
+    case 'update':
+      return { icon: Info, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' };
+    case 'info':
     default:
       return { icon: Info, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' };
   }
 };
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // تحديد جميع الإشعارات كمقروءة
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch('/api/accounts/notifications/', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(data.notifications.map((n: any) => ({
+          ...n,
+          type: n.type || 'info',
+          description: n.description,
+          is_read: n.is_read
+        })));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // مسح جميع الإشعارات
-  const clearAll = () => {
-    setNotifications([]);
+  const markAllAsRead = async () => {
+    for (const n of notifications.filter(n => !n.is_read)) {
+      try {
+        const token = localStorage.getItem('access_token');
+        await fetch(`/api/accounts/notifications/${n.id}/read/`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
   };
 
-  // تغيير حالة قراءة إشعار محدد عند الضغط عليه
-  const toggleRead = (id: number) => {
+  const toggleRead = async (id: number) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      await fetch(`/api/accounts/notifications/${id}/read/`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.error(err);
+    }
     setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, read: true } : n))
+      prev.map(n => (n.id === id ? { ...n, is_read: true } : n))
     );
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Header & Controls */}
       <div className="anim-fade-up" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 className="page-title">الإشعارات</h1>
@@ -68,56 +99,23 @@ export default function NotificationsPage() {
           </p>
         </div>
 
-        {notifications.length > 0 && (
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={markAllAsRead}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '8px 14px',
-                  borderRadius: 10,
-                  border: '1px solid var(--border)',
-                  background: 'var(--bg-card)',
-                  color: 'var(--text-primary)',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                <CheckCheck style={{ width: 16, height: 16, color: 'var(--primary)' }} />
-                تحديد الكل كمقروء
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={clearAll}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '8px 14px',
-                borderRadius: 10,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-                color: '#ef4444',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              <Trash2 style={{ width: 16, height: 16 }} />
-              مسح الكل
-            </button>
-          </div>
+        {notifications.length > 0 && unreadCount > 0 && (
+          <button type="button" onClick={markAllAsRead} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px',
+            borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)',
+            color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          }}>
+            <CheckCheck style={{ width: 16, height: 16, color: 'var(--primary)' }} />
+            تحديد الكل كمقروء
+          </button>
         )}
       </div>
 
-      {/* Notifications List or Empty State */}
-      {notifications.length === 0 ? (
+      {loading ? (
+        <div className="card" style={{ padding: 48, textAlign: 'center', color: 'var(--text-muted)' }}>
+          جاري التحميل...
+        </div>
+      ) : notifications.length === 0 ? (
         <div className="card anim-fade-up" style={{ padding: 48, textAlign: 'center', color: 'var(--text-muted)' }}>
           <BellOff style={{ width: 48, height: 48, margin: '0 auto 16px', opacity: 0.5 }} />
           <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>لا توجد إشعارات</div>
@@ -130,44 +128,28 @@ export default function NotificationsPage() {
             const IconComponent = config.icon;
 
             return (
-              <div
-                key={n.id}
-                className="card anim-fade-up"
-                onClick={() => toggleRead(n.id)}
-                style={{
-                  padding: 20,
-                  cursor: 'pointer',
-                  opacity: n.read ? 0.75 : 1,
-                  borderRight: !n.read ? `4px solid ${config.color}` : '1px solid var(--border)',
-                  transition: 'all 0.2s ease',
-                }}
-              >
+              <div key={n.id} className="card anim-fade-up" onClick={() => toggleRead(n.id)} style={{
+                padding: 20, cursor: 'pointer', opacity: n.is_read ? 0.75 : 1,
+                borderRight: !n.is_read ? `4px solid ${config.color}` : '1px solid var(--border)',
+                transition: 'all 0.2s ease',
+              }}>
                 <div className="row" style={{ gap: 16, alignItems: 'center' }}>
                   <div className="icon-box icon-box-md" style={{ background: config.bg, color: config.color, flexShrink: 0 }}>
                     <IconComponent style={{ width: 22, height: 22 }} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: n.read ? 700 : 900, color: 'var(--text-primary)', marginBottom: 4 }}>
+                    <div style={{ fontSize: 15, fontWeight: n.is_read ? 700 : 900, color: 'var(--text-primary)', marginBottom: 4 }}>
                       {n.title}
                     </div>
                     <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                      {n.desc}
+                      {n.description}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                      {n.time}
+                      {n.created_at}
                     </div>
                   </div>
-                  {!n.read && (
-                    <div
-                      title="غير مقروء"
-                      style={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
-                        background: config.color,
-                        flexShrink: 0,
-                      }}
-                    />
+                  {!n.is_read && (
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: config.color, flexShrink: 0 }} />
                   )}
                 </div>
               </div>
