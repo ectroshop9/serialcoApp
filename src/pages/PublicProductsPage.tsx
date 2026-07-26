@@ -3,6 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import Modal from '../components/UI/Modal';
 import { Search, ShoppingCart, Coins } from 'lucide-react';
 
+const API = 'https://serialcotv.onrender.com';
+const API_BASE_URL = `${API}/api/store`;
+
 interface Product {
   id: number;
   name: string;
@@ -11,8 +14,6 @@ interface Product {
   image: string | null;
   token_cost?: number;
 }
-
-const API_BASE_URL = 'https://serialcotv.onrender.com/api/store';
 
 export default function PublicProductsPage() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function PublicProductsPage() {
   const [sel, setSel] = useState<Product | null>(null);
   const [serial, setSerial] = useState('');
   const [pin, setPin] = useState('');
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -37,15 +39,25 @@ export default function PublicProductsPage() {
   const filtered = products.filter(p => p.name.toLowerCase().includes(q.toLowerCase()));
 
   const handleAction = (product: Product) => {
-    if (!localStorage.getItem('token')) { navigate('/login'); return; }
+    if (!localStorage.getItem('access_token')) { navigate('/login'); return; }
     if (product.product_type === 'digital') { setSel(product); setModal(true); }
     else navigate(`/store/product/${product.id}`);
   };
 
-  const handleDownload = (e: FormEvent) => {
+  const handleDownload = async (e: FormEvent) => {
     e.preventDefault();
-    alert(`تم خصم ${sel?.token_cost || 500} توكن`);
-    setModal(false);
+    if (!sel || !serial || !pin) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(`${API}/api/firmware/${sel.id}/?serial_number=${serial}&pin=${pin}`);
+      const data = await res.json();
+      if (data.success) {
+        window.open(data.download_url, '_blank');
+        setModal(false);
+        setSerial(''); setPin('');
+      } else alert(data.message || 'فشل');
+    } catch { alert('خطأ في الاتصال'); }
+    finally { setDownloading(false); }
   };
 
   return (
@@ -77,8 +89,8 @@ export default function PublicProductsPage() {
            {filtered.map(p => (
              <div key={p.id} className="card" style={{ padding: 20 }}>
                <img src={p.image || '/placeholder.jpg'} alt={p.name} style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, marginBottom: 16 }} />
-               <h3 style={{ fontSize: 15, fontWeight: 800 }}>{p.name}</h3>
-               {p.token_cost && <div style={{ color: 'var(--accent)' }}><Coins /> {p.token_cost} توكن</div>}
+               <h3>{p.name}</h3>
+               {p.token_cost && <div><Coins /> {p.token_cost} توكن</div>}
                <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)', marginBottom: 12 }}>{p.price} ر.س</div>
                <button onClick={() => handleAction(p)} className="btn btn-primary btn-block">
                  {p.product_type === 'digital' ? <><Coins /> استخدام التوكن</> : <><ShoppingCart /> اطلب الآن</>}
@@ -91,9 +103,11 @@ export default function PublicProductsPage() {
 
       <Modal isOpen={modal} onClose={() => setModal(false)} title="استخدام التوكن">
         <form onSubmit={handleDownload} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <input className="field-input" placeholder="رقم السيريال" value={serial} onChange={e => setSerial(e.target.value)} required />
-          <input className="field-input" type="password" placeholder="PIN" value={pin} onChange={e => setPin(e.target.value)} required />
-          <button type="submit" className="btn btn-primary btn-block"><Coins /> خصم التوكن والتحميل</button>
+          <input className="field-input" placeholder="رقم السيريال" value={serial} onChange={e => setSerial(e.target.value)} required disabled={downloading} />
+          <input className="field-input" type="password" placeholder="PIN" value={pin} onChange={e => setPin(e.target.value)} required disabled={downloading} />
+          <button type="submit" className="btn btn-primary btn-block" disabled={downloading}>
+            {downloading ? 'جاري...' : <><Coins /> خصم التوكن والتحميل</>}
+          </button>
         </form>
       </Modal>
     </div>
