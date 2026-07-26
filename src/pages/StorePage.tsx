@@ -15,7 +15,11 @@ export default function StorePage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <h1 className="page-title">المتجر</h1>
+      <div className="anim-fade-up">
+        <h1 className="page-title">المتجر</h1>
+        <p className="page-desc">اختر القسم اللي تبحث عنه</p>
+      </div>
+
       <div className="stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
         {CATEGORIES.map(c => (
           <button key={c.key} onClick={() => navigate(c.path)}
@@ -23,7 +27,7 @@ export default function StorePage() {
             <div style={{ background: `${c.color}18`, color: c.color, width: 64, height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <c.icon style={{ width: 32, height: 32 }} />
             </div>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>{c.label}</div>
+            <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>{c.label}</div>
             <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{c.desc}</div>
           </button>
         ))}
