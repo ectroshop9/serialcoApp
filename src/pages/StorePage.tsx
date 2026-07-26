@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Cpu, Zap, Monitor, HardDrive, CircuitBoard, Package } from 'lucide-react';
 
 const CATEGORIES = [
-  { key: 'firmware', label: 'سوفتوير', icon: Cpu, color: '#6366f1', desc: 'سوفتويرات التلفزيونات', path: '/files/firmware' },
+  { key: 'firmware', label: 'سوفتوير', icon: Cpu, color: '#6366f1', desc: 'سوفتويرات التلفزيونات', path: '/files/brands' },
   { key: 'power_supply', label: 'باور سبلاي', icon: Zap, color: '#f59e0b', desc: 'مخططات دوائر الباور', path: '/store/products?category=power_supply' },
   { key: 'main_board', label: 'مين بورد', icon: CircuitBoard, color: '#10b981', desc: 'مخططات المين بورد', path: '/store/products?category=main_board' },
   { key: 't_con', label: 'تي كون', icon: Monitor, color: '#3b82f6', desc: 'مخططات T-Con', path: '/store/products?category=t_con' },
