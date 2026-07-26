@@ -25,33 +25,40 @@ export default function SerialsPage() {
   const linkSerial = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const token = localStorage.getItem('access_token');
-    const res = await fetch(`${API}/api/accounts/link-serial/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ serial_number: serialInput, pin: pinInput })
-    });
-    const data = await res.json();
-    setMsg(data.success ? `تم ربط السيريال! ${data.tokens_added} توكن` : data.message);
-    if (data.success) { setSerialInput(''); setPinInput(''); fetchProfile(); }
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${API}/api/accounts/link-serial/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ serial_number: serialInput, pin: pinInput })
+      });
+      const data = await res.json();
+      setMsg(data.success ? `تم ربط السيريال! ${data.tokens_added} توكن` : data.message);
+      if (data.success) { setSerialInput(''); setPinInput(''); fetchProfile(); }
+    } catch (err) {
+      setMsg('خطأ في الاتصال');
+    }
     setLoading(false);
     setTimeout(() => setMsg(''), 4000);
   };
 
   const checkSerial = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch(`${API}/api/serials/check/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ serial_number: checkSerialInput, pin: checkPinInput })
-    });
-    setCheckResult(await res.json());
+    try {
+      const res = await fetch(`${API}/api/serials/check/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serial_number: checkSerialInput, pin: checkPinInput })
+      });
+      setCheckResult(await res.json());
+    } catch (err) {
+      setCheckResult({ success: false, message: 'خطأ في الاتصال' });
+    }
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <h1 className="page-title">سيريالاتي</h1>
-
       {msg && <div style={{ background: msg.includes('تم') ? '#10b981' : '#ef4444', color: '#fff', padding: 12, borderRadius: 12, textAlign: 'center' }}>{msg}</div>}
 
       <div className="card" style={{ padding: 24 }}>
