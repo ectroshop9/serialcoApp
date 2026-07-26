@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
+const API = 'https://serialcotv.onrender.com';
+
 interface User {
   id: number;
   name: string;
@@ -27,23 +29,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const validateToken = async (token: string) => {
     try {
-      const res = await fetch('/api/accounts/validate-token/', {
+      const res = await fetch(`${API}/api/accounts/validate-token/`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (data.valid) {
-        setUser(data.customer);
-      } else {
-        localStorage.removeItem('access_token');
-      }
-    } catch {
-      localStorage.removeItem('access_token');
-    }
+      if (data.valid) setUser(data.customer);
+      else localStorage.removeItem('access_token');
+    } catch { localStorage.removeItem('access_token'); }
   };
 
   const login = async (email: string, password: string) => {
-    const res = await fetch('/api/accounts/login/', {
+    const res = await fetch(`${API}/api/accounts/login/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -52,13 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data.success) {
       localStorage.setItem('access_token', data.access_token);
       setUser(data.customer);
-    } else {
-      throw new Error(data.message);
-    }
+    } else throw new Error(data.message);
   };
 
   const register = async (name: string, phone: string, email: string, password: string) => {
-    const res = await fetch('/api/accounts/register/', {
+    const res = await fetch(`${API}/api/accounts/register/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, phone, email, password })
@@ -67,9 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data.success) {
       localStorage.setItem('access_token', data.access_token);
       setUser(data.customer);
-    } else {
-      throw new Error(data.message);
-    }
+    } else throw new Error(data.message);
   };
 
   const logout = () => {
@@ -84,6 +77,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export function useAuth() { return useContext(AuthContext); }
