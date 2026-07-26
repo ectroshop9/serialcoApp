@@ -1,97 +1,121 @@
 import { useState, useEffect } from 'react';
-import Modal from '../components/UI/Modal';
-import { Search, FileText, Eye, X, Zap, Cpu, Monitor, Coins } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Search, ShoppingCart, ArrowRight, AlertCircle, Loader2, X, Coins } from 'lucide-react';
 
 const API = 'https://serialcotv.onrender.com';
+const API_BASE_URL = `${API}/api/store`;
 
-interface Schematic {
+interface Product {
   id: number;
-  title: string;
-  model_number: string;
-  brand__name: string;
-  schematic_type: string;
-  token_cost: number;
-  downloads_count: number;
+  name: string;
+  price: string;
+  product_type: 'physical' | 'digital';
+  image: string | null;
+  token_cost?: number;
 }
 
-export default function SchematicsPage() {
-  const [q, setQ] = useState('');
-  const [schematics, setSchematics] = useState<Schematic[]>([]);
+const CATEGORY_LABELS: Record<string, string> = {
+  firmware: 'سوفتوير',
+  power_supply: 'باور سبلاي',
+  main_board: 'مين بورد',
+  t_con: 'تي كون',
+  emmc: 'مخططات EMMC',
+  parts: 'قطع إلكترونية',
+};
+
+const SCHEMATIC_CATEGORIES = ['power_supply', 'main_board', 't_con', 'emmc'];
+
+export default function ProductsPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const category = searchParams.get('category') || '';
+
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sel, setSel] = useState<Schematic | null>(null);
-  const [open, setOpen] = useState(false);
-  const [serial, setSerial] = useState('');
-  const [pin, setPin] = useState('');
-  const [downloading, setDownloading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [q, setQ] = useState('');
 
   useEffect(() => {
-    fetch(`${API}/api/schematics/`)
+    setLoading(true);
+    let url;
+
+    if (category === 'firmware') {
+      url = `${API}/api/firmware/`;
+    } else if (SCHEMATIC_CATEGORIES.includes(category)) {
+      url = `${API}/api/schematics/`;
+    } else {
+      url = `${API_BASE_URL}/products/${category ? `?category=${category}` : ''}`;
+    }
+
+    fetch(url)
       .then(res => res.json())
-      .then(data => { setSchematics(data.schematics || []); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
+      .then(data => {
+        if (category === 'firmware') {
+          const items = (data.firmwares || []).map((f: any) => ({
+            id: f.id,
+            name: `${f.brand__name} - ${f.model_number}${f.version ? ' v' + f.version : ''}`,
+            price: `${f.token_cost} توكن`,
+            product_type: 'digital' as const,
+            image: null,
+            token_cost: f.token_cost,
+          }));
+          setProducts(items);
+        } else if (SCHEMATIC_CATEGORIES.includes(category)) {
+          const items = (data.schematics || []).map((s: any) => ({
+            id: s.id,
+            name: s.title,
+            price: `${s.token_cost} توكن`,
+            product_type: 'digital' as const,
+            image: null,
+            token_cost: s.token_cost,
+          }));
+          setProducts(items);
+        } else {
+          setProducts(data.products || []);
+        }
+        setLoading(false);
+      })
+      .catch(() => { setError('فشل التحميل'); setLoading(false); });
+  }, [category]);
 
-  const filtered = schematics.filter(s =>
-    s.title.toLowerCase().includes(q.toLowerCase()) ||
-    s.model_number.toLowerCase().includes(q.toLowerCase())
-  );
+  const filtered = products.filter(p => p.name.toLowerCase().includes(q.toLowerCase()));
 
-  const handleDownload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!sel || !serial || !pin) return;
-    setDownloading(true);
-    try {
-      const res = await fetch(`${API}/api/schematics/${sel.id}/?serial_number=${serial}&pin=${pin}`);
-      const data = await res.json();
-      if (data.success) {
-        window.open(data.download_url, '_blank');
-        setOpen(false);
-      } else alert(data.message);
-    } catch { alert('خطأ'); }
-    finally { setDownloading(false); }
-  };
+  if (loading) return <div style={{ textAlign: 'center', padding: 80 }}><Loader2 className="spin" /><p>جاري التحميل...</p></div>;
+  if (error) return <div className="card" style={{ textAlign: 'center', padding: 40 }}><AlertCircle /><p>{error}</p><button onClick={() => window.location.reload()} className="btn btn-primary">إعادة</button></div>;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <h1 className="page-title">المخططات</h1>
-      
-      <div className="card" style={{ padding: 20 }}>
-        <div className="field">
-          <span className="field-icon"><Search /></span>
-          <input className="field-input" placeholder="ابحث..." value={q} onChange={e => setQ(e.target.value)} />
-          {q && <span onClick={() => setQ('')}><X /></span>}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div className="row-between">
+        <div>
+          <button onClick={() => navigate('/store')} className="btn btn-ghost btn-sm"><ArrowRight /> العودة</button>
+          <h1 className="page-title">{CATEGORY_LABELS[category] || 'المنتجات'}</h1>
+          <p className="page-desc">{filtered.length} منتج</p>
         </div>
       </div>
 
-      {loading ? <div style={{ textAlign: 'center', padding: 40 }}>جاري التحميل...</div> :
-        <div className="table-wrap">
-          <table className="tbl">
-            <thead><tr><th>العنوان</th><th>الماركة</th><th>الموديل</th><th>التوكن</th><th>تحميل</th></tr></thead>
-            <tbody>
-              {filtered.map(s => (
-                <tr key={s.id}>
-                  <td>{s.title}</td>
-                  <td>{s.brand__name}</td>
-                  <td>{s.model_number}</td>
-                  <td><Coins /> {s.token_cost}</td>
-                  <td><button onClick={() => { setSel(s); setOpen(true); }} className="btn btn-primary btn-sm"><FileText /> تحميل</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      }
+      <div className="field" style={{ maxWidth: 400 }}>
+        <span className="field-icon"><Search /></span>
+        <input className="field-input" placeholder="بحث..." value={q} onChange={e => setQ(e.target.value)} />
+        {q && <button onClick={() => setQ('')}><X /></button>}
+      </div>
 
-      <Modal isOpen={open} onClose={() => setOpen(false)} title="تأكيد التحميل">
-        {sel && (
-          <form onSubmit={handleDownload} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div><strong>{sel.title}</strong> ({sel.token_cost} توكن)</div>
-            <input className="field-input" placeholder="رقم السيريال" value={serial} onChange={e => setSerial(e.target.value)} required disabled={downloading} />
-            <input className="field-input" type="password" placeholder="PIN" value={pin} onChange={e => setPin(e.target.value)} required disabled={downloading} />
-            <button className="btn btn-primary btn-block" disabled={downloading}>{downloading ? 'جاري...' : <><Coins /> تأكيد التحميل</>}</button>
-          </form>
-        )}
-      </Modal>
+      {filtered.length === 0 ? (
+        <div className="card" style={{ padding: 60, textAlign: 'center' }}><p>لا توجد منتجات</p></div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+          {filtered.map(p => (
+            <div key={p.id} className="card" style={{ padding: 20 }}>
+              <img src={p.image || '/placeholder.jpg'} alt={p.name} style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, marginBottom: 16 }} />
+              <h3>{p.name}</h3>
+              {p.token_cost && <div><Coins /> {p.token_cost} توكن</div>}
+              <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)', marginBottom: 16 }}>{p.price}</div>
+              <button onClick={() => navigate(`/store/product/${p.id}`)} className="btn btn-primary btn-block">
+                {p.product_type === 'digital' ? <><Coins /> استخدام التوكن</> : <><ShoppingCart /> اطلب الآن</>}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
