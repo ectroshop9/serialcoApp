@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import StatCard from '../components/UI/StatCard';
@@ -7,6 +7,28 @@ import { Coins, TrendingUp, Star, Eye, EyeOff } from 'lucide-react';
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
   const [showSerial, setShowSerial] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch('/api/accounts/profile/', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) {
+          setProfile(data.customer);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/" replace />;
@@ -54,17 +76,17 @@ export default function DashboardPage() {
       }}>
         <StatCard
           icon={<Coins style={{ width: 20, height: 20 }} />}
-          label="التوكن المتبقي"
-          value={(user.remainingDownloads ?? 0).toLocaleString()}
-          subtitle={`من أصل ${(user.totalDownloads ?? 0).toLocaleString()} توكن`}
+          label="رصيد التوكن"
+          value={profile?.token_balance?.toLocaleString() || '0'}
+          subtitle="التوكن المتاح"
           gradient="var(--grad-primary)"
         />
 
         <StatCard
           icon={<TrendingUp style={{ width: 20, height: 20 }} />}
-          label="إجمالي التوكن المستخدم"
-          value={(user.totalDownloads ?? 0).toLocaleString()}
-          subtitle="منذ الاشتراك"
+          label="الحالة"
+          value={profile?.is_active ? 'نشط' : 'غير نشط'}
+          subtitle="حالة الحساب"
           gradient="var(--grad-success)"
         />
 
@@ -77,22 +99,21 @@ export default function DashboardPage() {
                 background: 'none', border: 'none', padding: 0,
                 cursor: 'pointer', color: 'inherit', display: 'flex', alignItems: 'center'
               }}
-              title={showSerial ? "إخفاء الكود" : "إظهار الكود"}
             >
               {showSerial ? <EyeOff style={{ width: 20, height: 20 }} /> : <Eye style={{ width: 20, height: 20 }} />}
             </button>
           }
           label="كود السيريال"
-          value={formatSerial(user.serialCode)}
+          value={formatSerial(profile?.serial_code)}
           subtitle={showSerial ? "اضغط للإخفاء" : "اضغط للإظهار"}
           gradient="var(--grad-accent)"
         />
 
         <StatCard
           icon={<Star style={{ width: 20, height: 20 }} />}
-          label="الباقة الحالية"
-          value={user.plan || 'غير محدد'}
-          subtitle="اشتراك سنوي"
+          label="الاسم"
+          value={profile?.name || user.name || '-'}
+          subtitle={profile?.phone || ''}
           gradient="var(--grad-info)"
         />
       </div>
