@@ -1,74 +1,89 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 interface User {
   id: number;
   name: string;
-  email: string;
-  phone: string;
-  avatar?: string;
-  remainingDownloads: number;
-  totalDownloads: number;
-  serialCode: string;
-  plan: string;
-  joinDate: string;
+  email?: string;
+  phone?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => void;
-  loginWithGoogle: () => void;
-  loginWithFacebook: () => void;
-  register: (name: string, phone: string, email: string, password: string) => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, phone: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const mockUser: User = {
-  id: 1,
-  name: 'أحمد محمد الفني',
-  email: 'ahmed@example.com',
-  phone: '+966501234567',
-  remainingDownloads: 47,
-  totalDownloads: 153,
-  serialCode: 'STV-2024-A7X9K',
-  plan: 'احترافي',
-  joinDate: '2024-01-15',
-};
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = (_email: string, _password: string) => {
-    setUser(mockUser);
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) validateToken(token);
+  }, []);
+
+  const validateToken = async (token: string) => {
+    try {
+      const res = await fetch('/api/accounts/validate-token/', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setUser(data.customer);
+      } else {
+        localStorage.removeItem('access_token');
+      }
+    } catch {
+      localStorage.removeItem('access_token');
+    }
   };
 
-  const loginWithGoogle = () => {
-    setUser(mockUser);
+  const login = async (email: string, password: string) => {
+    const res = await fetch('/api/accounts/login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('access_token', data.access_token);
+      setUser(data.customer);
+    } else {
+      throw new Error(data.message);
+    }
   };
 
-  const loginWithFacebook = () => {
-    setUser(mockUser);
-  };
-
-  const register = (name: string, phone: string, email: string, _password: string) => {
-    setUser({ ...mockUser, name, phone, email });
+  const register = async (name: string, phone: string, email: string, password: string) => {
+    const res = await fetch('/api/accounts/register/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, email, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('access_token', data.access_token);
+      setUser(data.customer);
+    } else {
+      throw new Error(data.message);
+    }
   };
 
   const logout = () => {
+    localStorage.removeItem('access_token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, loginWithGoogle, loginWithFacebook, register, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
-  return context;
+  return useContext(AuthContext);
 }
