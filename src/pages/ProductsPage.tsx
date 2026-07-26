@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, ArrowRight, AlertCircle, Loader2, X, Coins } from 'lucide-react';
 
+const API = 'https://serialcotv.onrender.com';
+const API_BASE_URL = `${API}/api/store`;
+
 interface Product {
   id: number;
   name: string;
@@ -10,8 +13,6 @@ interface Product {
   image: string | null;
   token_cost?: number;
 }
-
-const API_BASE_URL = 'https://serialcotv.onrender.com/api/store';
 
 const CATEGORY_LABELS: Record<string, string> = {
   firmware: 'سوفتوير',
@@ -33,10 +34,28 @@ export default function ProductsPage() {
 
   useEffect(() => {
     setLoading(true);
-    const url = `${API_BASE_URL}/products/${category ? `?category=${category}` : ''}`;
+    const url = category === 'firmware'
+      ? `${API}/api/firmware/`
+      : `${API_BASE_URL}/products/${category ? `?category=${category}` : ''}`;
+
     fetch(url)
       .then(res => res.json())
-      .then(data => { setProducts(data.products || []); setLoading(false); })
+      .then(data => {
+        if (category === 'firmware') {
+          const items = (data.firmwares || []).map((f: any) => ({
+            id: f.id,
+            name: `${f.brand__name} - ${f.model_number}${f.version ? ' v' + f.version : ''}`,
+            price: `${f.token_cost} توكن`,
+            product_type: 'digital' as const,
+            image: null,
+            token_cost: f.token_cost,
+          }));
+          setProducts(items);
+        } else {
+          setProducts(data.products || []);
+        }
+        setLoading(false);
+      })
       .catch(() => { setError('فشل التحميل'); setLoading(false); });
   }, [category]);
 
@@ -64,13 +83,13 @@ export default function ProductsPage() {
       {filtered.length === 0 ? (
         <div className="card" style={{ padding: 60, textAlign: 'center' }}><p>لا توجد منتجات</p></div>
       ) : (
-        <div className="stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
           {filtered.map(p => (
             <div key={p.id} className="card" style={{ padding: 20 }}>
               <img src={p.image || '/placeholder.jpg'} alt={p.name} style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, marginBottom: 16 }} />
               <h3>{p.name}</h3>
               {p.token_cost && <div><Coins /> {p.token_cost} توكن</div>}
-              <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)', marginBottom: 16 }}>{p.price} ر.س</div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)', marginBottom: 16 }}>{p.price}</div>
               <button onClick={() => navigate(`/store/product/${p.id}`)} className="btn btn-primary btn-block">
                 {p.product_type === 'digital' ? <><Coins /> استخدام التوكن</> : <><ShoppingCart /> اطلب الآن</>}
               </button>
