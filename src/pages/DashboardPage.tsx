@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import StatCard from '../components/UI/StatCard';
 import { Coins, User, Key } from 'lucide-react';
 
+const API = 'https://serialcotv.onrender.com';
+
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -13,7 +15,7 @@ export default function DashboardPage() {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('access_token');
-        const res = await fetch('/api/accounts/profile/', {
+        const res = await fetch(`${API}/api/accounts/profile/`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -45,27 +47,15 @@ export default function DashboardPage() {
       <div className="stagger" style={{
         display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12
       }}>
-        <StatCard
-          icon={<Coins style={{ width: 20, height: 20 }} />}
-          label="رصيد التوكن"
+        <StatCard icon={<Coins />} label="رصيد التوكن"
           value={loading ? '...' : (customer?.token_balance?.toLocaleString() || '0')}
-          subtitle="المتبقي"
-          gradient="var(--grad-primary)"
-        />
-        <StatCard
-          icon={<User style={{ width: 20, height: 20 }} />}
-          label="الحالة"
+          subtitle="المتبقي" gradient="var(--grad-primary)" />
+        <StatCard icon={<User />} label="الحالة"
           value={customer?.is_active ? 'نشط ✅' : 'غير نشط ❌'}
-          subtitle="حالة الحساب"
-          gradient="var(--grad-success)"
-        />
-        <StatCard
-          icon={<Key style={{ width: 20, height: 20 }} />}
-          label="رقم العميل"
+          subtitle="حالة الحساب" gradient="var(--grad-success)" />
+        <StatCard icon={<Key />} label="رقم العميل"
           value={`#${customer?.id || '-'}`}
-          subtitle="معرف الحساب"
-          gradient="var(--grad-accent)"
-        />
+          subtitle="معرف الحساب" gradient="var(--grad-accent)" />
       </div>
     </div>
   );
