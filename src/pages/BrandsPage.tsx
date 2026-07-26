@@ -18,6 +18,8 @@ export default function BrandsPage() {
     fetch(`${API}/api/content/brands/`)
       .then(res => res.json())
       .then(data => { setBrands(data.brands || []); setLoading(false); })
+            console.log('Brands:', JSON.stringify(data.brands));  // ← شوف الرابط
+
       .catch(() => setLoading(false));
   }, []);
 
