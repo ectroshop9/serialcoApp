@@ -11,6 +11,7 @@ import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import FilesPage from './pages/FilesPage';
+import BrandsPage from './pages/BrandsPage';
 import FirmwarePage from './pages/FirmwarePage';
 import SchematicsPage from './pages/SchematicsPage';
 import ToolsPage from './pages/ToolsPage';
@@ -26,9 +27,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
 }
 
@@ -50,6 +49,7 @@ export default function App() {
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/files" element={<FilesPage />} />
+              <Route path="/files/brands" element={<BrandsPage />} />
               <Route path="/files/firmware" element={<FirmwarePage />} />
               <Route path="/files/schematics" element={<SchematicsPage />} />
               <Route path="/tools" element={<ToolsPage />} />
