@@ -18,8 +18,6 @@ export default function BrandsPage() {
     fetch(`${API}/api/content/brands/`)
       .then(res => res.json())
       .then(data => { setBrands(data.brands || []); setLoading(false); })
-            console.log('Brands:', JSON.stringify(data.brands));  // ← شوف الرابط
-
       .catch(() => setLoading(false));
   }, []);
 
@@ -32,7 +30,7 @@ export default function BrandsPage() {
         {brands.map(b => (
           <button key={b.id} onClick={() => navigate(`/files/firmware?brand=${b.name}`)}
             className="card" style={{ padding: 24, textAlign: 'center', cursor: 'pointer' }}>
-            {b.logo ? <img src={b.logo} alt={b.name} style={{ width: 80, height: 80, objectFit: 'contain' }} /> : <div style={{ fontSize: 24, fontWeight: 900 }}>{b.name}</div>}
+            {b.logo ? <img src={`${b.logo}.jpg`} alt={b.name} style={{ width: 80, height: 80, objectFit: 'contain' }} /> : <div style={{ fontSize: 24, fontWeight: 900 }}>{b.name}</div>}
             <div style={{ marginTop: 8, fontWeight: 700 }}>{b.name}</div>
           </button>
         ))}
