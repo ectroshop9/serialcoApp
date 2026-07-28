@@ -21,6 +21,12 @@ export default function BrandsPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  // دالة لمعالجة رابط الصورة
+  const formatLogoUrl = (logo: string) => {
+    if (logo.startsWith('http')) return logo;
+    return `${API}${logo.startsWith('/') ? '' : '/'}${logo}`;
+  };
+
   if (loading) return <div style={{ textAlign: 'center', padding: 80 }}>جاري التحميل...</div>;
 
   return (
@@ -30,7 +36,15 @@ export default function BrandsPage() {
         {brands.map(b => (
           <button key={b.id} onClick={() => navigate(`/files/firmware?brand=${b.name}`)}
             className="card" style={{ padding: 24, textAlign: 'center', cursor: 'pointer' }}>
-            {b.logo ? <img src={`${b.logo}.jpg`} alt={b.name} style={{ width: 80, height: 80, objectFit: 'contain' }} /> : <div style={{ fontSize: 24, fontWeight: 900 }}>{b.name}</div>}
+            {b.logo ? (
+              <img 
+                src={formatLogoUrl(b.logo)} 
+                alt={b.name} 
+                style={{ width: 80, height: 80, objectFit: 'contain' }} 
+              />
+            ) : (
+              <div style={{ fontSize: 24, fontWeight: 900 }}>{b.name}</div>
+            )}
             <div style={{ marginTop: 8, fontWeight: 700 }}>{b.name}</div>
           </button>
         ))}
