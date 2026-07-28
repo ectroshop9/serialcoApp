@@ -17,15 +17,12 @@ export default function BrandsPage() {
   useEffect(() => {
     fetch(`${API}/api/content/brands/`)
       .then(res => res.json())
-      .then(data => { setBrands(data.brands || []); setLoading(false); })
+      .then(data => { 
+        setBrands(data.brands || []); 
+        setLoading(false); 
+      })
       .catch(() => setLoading(false));
   }, []);
-
-  // دالة لمعالجة رابط الصورة
-  const formatLogoUrl = (logo: string) => {
-    if (logo.startsWith('http')) return logo;
-    return `${API}${logo.startsWith('/') ? '' : '/'}${logo}`;
-  };
 
   if (loading) return <div style={{ textAlign: 'center', padding: 80 }}>جاري التحميل...</div>;
 
@@ -34,11 +31,15 @@ export default function BrandsPage() {
       <h1 className="page-title">اختر الماركة</h1>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 16 }}>
         {brands.map(b => (
-          <button key={b.id} onClick={() => navigate(`/files/firmware?brand=${b.name}`)}
-            className="card" style={{ padding: 24, textAlign: 'center', cursor: 'pointer' }}>
+          <button 
+            key={b.id} 
+            onClick={() => navigate(`/files/firmware?brand=${b.name}`)}
+            className="card" 
+            style={{ padding: 24, textAlign: 'center', cursor: 'pointer' }}
+          >
             {b.logo ? (
               <img 
-                src={formatLogoUrl(b.logo)} 
+                src={b.logo.startsWith('http') ? b.logo : `${API}${b.logo}`} 
                 alt={b.name} 
                 style={{ width: 80, height: 80, objectFit: 'contain' }} 
               />
