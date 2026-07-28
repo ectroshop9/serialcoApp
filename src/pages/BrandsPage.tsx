@@ -24,11 +24,24 @@ export default function BrandsPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  // دالة لتجهيز رابط الصورة وتفادي دمج الكلمات بدون Slash
+  // دالة معالجة روابط الصور وإضافة الامتداد الناقص
   const getImageUrl = (path: string) => {
-    if (path.startsWith('http')) return path;
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    return `${API}${cleanPath}`;
+    if (!path) return '';
+    
+    let fullUrl = path;
+
+    // إذا كان الرابط نسبياً، ندمجه مع رابط الـ API
+    if (!path.startsWith('http')) {
+      const cleanPath = path.startsWith('/') ? path : `/${path}`;
+      fullUrl = `${API}${cleanPath}`;
+    }
+
+    // إذا كان الرابط لا ينتهي بأحد امتدادات الصور المعروضة، نضيف له .png تلقائياً
+    if (!/\.(jpg|jpeg|png|webp|svg|gif)$/i.test(fullUrl)) {
+      fullUrl += '.png';
+    }
+
+    return fullUrl;
   };
 
   if (loading) return <div style={{ textAlign: 'center', padding: 80 }}>جاري التحميل...</div>;
@@ -49,6 +62,10 @@ export default function BrandsPage() {
                 src={getImageUrl(b.logo)} 
                 alt={b.name} 
                 style={{ width: 80, height: 80, objectFit: 'contain' }} 
+                onError={(e) => {
+                  // في حال فشل تحميل الصورة، يتم إخفاؤها لكي لا تظهر أيقونة الصورة المكسورة
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
               />
             ) : (
               <div style={{ fontSize: 24, fontWeight: 900 }}>{b.name}</div>
