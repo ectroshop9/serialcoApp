@@ -24,6 +24,13 @@ export default function BrandsPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  // دالة لتجهيز رابط الصورة وتفادي دمج الكلمات بدون Slash
+  const getImageUrl = (path: string) => {
+    if (path.startsWith('http')) return path;
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${API}${cleanPath}`;
+  };
+
   if (loading) return <div style={{ textAlign: 'center', padding: 80 }}>جاري التحميل...</div>;
 
   return (
@@ -39,7 +46,7 @@ export default function BrandsPage() {
           >
             {b.logo ? (
               <img 
-                src={b.logo.startsWith('http') ? b.logo : `${API}${b.logo}`} 
+                src={getImageUrl(b.logo)} 
                 alt={b.name} 
                 style={{ width: 80, height: 80, objectFit: 'contain' }} 
               />
