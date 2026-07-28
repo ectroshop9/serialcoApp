@@ -54,7 +54,7 @@ export default function BrandsPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       
-      {/* صف الهيدر: يحتوي على العنوان يميناً وحقل البحث يساراً */}
+      {/* صف الهيدر */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -64,7 +64,7 @@ export default function BrandsPage() {
       }}>
         <h1 className="page-title" style={{ margin: 0 }}>اختر الماركة</h1>
 
-        {/* حقل البحث بالجهة اليسرى */}
+        {/* حقل البحث بإطار أسود خلفية شفافة */}
         <input
           type="text"
           placeholder="ابحث عن ماركة..."
@@ -74,12 +74,12 @@ export default function BrandsPage() {
             padding: '10px 16px',
             fontSize: '15px',
             borderRadius: '8px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            border: '1px solid #000000', // الإطار باللون الأسود فقط
             backgroundColor: 'transparent',
             color: 'inherit',
             outline: 'none',
             width: '100%',
-            maxWidth: '280px' // حجم مناسب ليكون بجانب العنوان
+            maxWidth: '280px'
           }}
         />
       </div>
