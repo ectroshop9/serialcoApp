@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API = 'https://serialcotv.onrender.com';
+const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/rsmjekym/';
 
 interface Brand {
   id: number;
@@ -24,19 +25,24 @@ export default function BrandsPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  // دالة معالجة روابط الصور وإضافة الامتداد الناقص
+  // دالة لتجهيز رابط الصورة وتفادي أخطاء CORB والمسارات الناقصة
   const getImageUrl = (path: string) => {
     if (!path) return '';
-    
+
     let fullUrl = path;
 
-    // إذا كان الرابط نسبياً، ندمجه مع رابط الـ API
-    if (!path.startsWith('http')) {
+    // 1. إذا كان المسار يتبع لـ Cloudinary أو يحتوي على مسار الميديا لكن بدون النطاق الرئيسي
+    if (!path.startsWith('http') && (path.includes('image/upload') || path.includes('media/') || path.includes('cloudinary'))) {
+      const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+      fullUrl = `${CLOUDINARY_BASE_URL}${cleanPath}`;
+    } 
+    // 2. إذا كان مساراً نسبياً عادياً على سيرفر الـ API
+    else if (!path.startsWith('http')) {
       const cleanPath = path.startsWith('/') ? path : `/${path}`;
       fullUrl = `${API}${cleanPath}`;
     }
 
-    // إذا كان الرابط لا ينتهي بأحد امتدادات الصور المعروضة، نضيف له .png تلقائياً
+    // 3. إضافة امتداد .png تلقائياً إذا كان الرابط لا ينتهي بامتداد صورة معرّف
     if (!/\.(jpg|jpeg|png|webp|svg|gif)$/i.test(fullUrl)) {
       fullUrl += '.png';
     }
@@ -63,7 +69,7 @@ export default function BrandsPage() {
                 alt={b.name} 
                 style={{ width: 80, height: 80, objectFit: 'contain' }} 
                 onError={(e) => {
-                  // في حال فشل تحميل الصورة، يتم إخفاؤها لكي لا تظهر أيقونة الصورة المكسورة
+                  // إخفاء الصورة المكسورة فوراً في حال فشل تحميلها
                   (e.target as HTMLElement).style.display = 'none';
                 }}
               />
