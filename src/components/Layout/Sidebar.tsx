@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
-  LayoutDashboard, FileText, Wrench, User, LogOut, ShoppingCart, Key, Bell, X
+  LayoutDashboard, FileText, User, LogOut, ShoppingCart, Key, Bell, X
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -14,7 +14,6 @@ const menuItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'الرئيسية' },
   { path: '/files', icon: FileText, label: 'الملفات المخزنة' },
   { path: '/serials', icon: Key, label: 'سيريالاتي' },
-  { path: '/tools', icon: Wrench, label: 'الأدوات' },
   { path: '/store', icon: ShoppingCart, label: 'المتجر' },
   { path: '/notifications', icon: Bell, label: 'الإشعارات' },
   { path: '/profile', icon: User, label: 'حسابي' },
