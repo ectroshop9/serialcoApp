@@ -14,15 +14,11 @@ import FilesPage from './pages/FilesPage';
 import BrandsPage from './pages/BrandsPage';
 import FirmwarePage from './pages/FirmwarePage';
 import SchematicsPage from './pages/SchematicsPage';
-import ToolsPage from './pages/ToolsPage';
-import SMDCalculatorPage from './pages/SMDCalculatorPage';
-import ServiceCodesPage from './pages/ServiceCodesPage';
 import SerialsPage from './pages/SerialsPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ProfilePage from './pages/ProfilePage';
 import StorePage from './pages/StorePage';
 import ProductsPage from './pages/ProductsPage';
-import PublicProductsPage from './pages/PublicProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 
 function ScrollToTop() {
@@ -44,7 +40,6 @@ export default function App() {
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/products" element={<PublicProductsPage />} />
             
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
@@ -52,9 +47,6 @@ export default function App() {
               <Route path="/files/brands" element={<BrandsPage />} />
               <Route path="/files/firmware" element={<FirmwarePage />} />
               <Route path="/files/schematics" element={<SchematicsPage />} />
-              <Route path="/tools" element={<ToolsPage />} />
-              <Route path="/tools/smd" element={<SMDCalculatorPage />} />
-              <Route path="/tools/codes" element={<ServiceCodesPage />} />
               <Route path="/serials" element={<SerialsPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/store" element={<StorePage />} />
