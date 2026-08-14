@@ -34,13 +34,18 @@ export default function App() {
         <HashRouter>
           <ScrollToTop />
           <Routes>
+            {/* Public Routes - بدون تسجيل دخول */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsOfUsePage />} />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/store" element={<StorePage />} />
+            <Route path="/store/products" element={<ProductsPage />} />
+            <Route path="/store/product/:id" element={<ProductDetailPage />} />
             
+            {/* Protected Routes - داخل MainLayout */}
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/files" element={<FilesPage />} />
@@ -49,9 +54,6 @@ export default function App() {
               <Route path="/files/schematics" element={<SchematicsPage />} />
               <Route path="/serials" element={<SerialsPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/store" element={<StorePage />} />
-              <Route path="/store/products" element={<ProductsPage />} />
-              <Route path="/store/product/:id" element={<ProductDetailPage />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Route>
             
