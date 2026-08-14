@@ -32,20 +32,32 @@ export default function DashboardPage() {
   if (!isAuthenticated) return <Navigate to="/" replace />;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: 'clamp(16px, 3vw, 24px)', // مسافات مرنة تتكيف مع حجم الشاشة
+      padding: '0 8px' // حماية الجوانب من التلاصق في الشاشات الصغرى
+    }}>
+      {/* الهيدر الرئيسي */}
       <div className="anim-fade-up" style={{
-        background: 'var(--grad-primary)', borderRadius: 20, padding: '32px 28px', color: '#fff'
+        background: 'var(--grad-primary)', 
+        borderRadius: 20, 
+        padding: 'clamp(20px, 4vw, 32px) clamp(16px, 3vw, 28px)', // padding مرن
+        color: '#fff'
       }}>
-        <h1 style={{ fontSize: 26, fontWeight: 900 }}>
+        <h1 style={{ fontSize: 'clamp(20px, 5vw, 26px)', fontWeight: 900 }}>
           مرحباً، {customer?.name || user?.name || 'ضيف'} 👋
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8, marginTop: 8 }}>
+        <p style={{ fontSize: 14, opacity: 0.8, marginTop: 8, wordBreak: 'break-word' }}>
           {customer?.email || customer?.phone || ''}
         </p>
       </div>
 
+      {/* شبكة البطاقات - تحسين التجاوب */}
       <div className="stagger" style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', // تحسين الحد الأدنى للبطاقة
+        gap: 12
       }}>
         <StatCard icon={<Coins />} label="رصيد التوكن"
           value={loading ? '...' : (customer?.token_balance?.toLocaleString() || '0')}

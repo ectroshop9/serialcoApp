@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API = 'https://serialcotv.onrender.com';
@@ -15,13 +15,14 @@ export default function BrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     fetch(`${API}/api/content/brands/`)
-      .then(res => res.json())
-      .then(data => { 
-        setBrands(data.brands || []); 
-        setLoading(false); 
+      .then((res) => res.json())
+      .then((data) => {
+        setBrands(data.brands || []);
+        setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
@@ -45,26 +46,42 @@ export default function BrandsPage() {
     return fullUrl;
   };
 
-  const filteredBrands = brands.filter(b =>
-    b.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBrands = useMemo(() => {
+    return brands.filter((b) =>
+      b.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [brands, searchQuery]);
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 80 }}>جاري التحميل...</div>;
+  const handleImageError = (brandId: number) => {
+    setImageErrors((prev) => ({ ...prev, [brandId]: true }));
+  };
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '80px 16px', color: 'var(--text-secondary)' }}>
+        جاري التحميل...
+      </div>
+    );
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '16px 0' }}>
       
       {/* صف الهيدر */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        flexWrap: 'wrap', 
-        gap: 16 
-      }}>
-        <h1 className="page-title" style={{ margin: 0 }}>اختر الماركة</h1>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16,
+        }}
+      >
+        <h1 className="page-title" style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>
+          اختر الماركة
+        </h1>
 
-        {/* حقل البحث بإطار أسود خلفية شفافة */}
+        {/* حقل البحث */}
         <input
           type="text"
           placeholder="ابحث عن ماركة..."
@@ -72,44 +89,78 @@ export default function BrandsPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
             padding: '10px 16px',
-            fontSize: '15px',
+            fontSize: '14px',
             borderRadius: '8px',
-            border: '1px solid #000000', // الإطار باللون الأسود فقط
+            border: '1px solid var(--border, #000000)',
             backgroundColor: 'transparent',
             color: 'inherit',
             outline: 'none',
             width: '100%',
-            maxWidth: '280px'
+            maxWidth: '280px',
           }}
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 16 }}>
+      {/* شبكة الماركات */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+          gap: 16,
+        }}
+      >
         {filteredBrands.length > 0 ? (
-          filteredBrands.map(b => (
-            <button 
-              key={b.id} 
-              onClick={() => navigate(`/files/firmware?brand=${b.name}`)}
-              className="card" 
-              style={{ padding: 24, textAlign: 'center', cursor: 'pointer' }}
+          filteredBrands.map((b) => (
+            <button
+              key={b.id}
+              onClick={() => navigate(`/files/firmware?brand=${encodeURIComponent(b.name)}`)}
+              className="card"
+              style={{
+                padding: 20,
+                textAlign: 'center',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--bg-secondary, #fff)',
+                borderRadius: '12px',
+                border: '1px solid var(--border, #eee)',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              }}
             >
-              {b.logo ? (
-                <img 
-                  src={getImageUrl(b.logo)} 
-                  alt={b.name} 
-                  style={{ width: 80, height: 80, objectFit: 'contain' }} 
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
+              {b.logo && !imageErrors[b.id] ? (
+                <img
+                  src={getImageUrl(b.logo)}
+                  alt={b.name}
+                  style={{ width: 70, height: 70, objectFit: 'contain', marginBottom: 8 }}
+                  onError={() => handleImageError(b.id)}
                 />
               ) : (
-                <div style={{ fontSize: 24, fontWeight: 900 }}>{b.name}</div>
+                <div
+                  style={{
+                    width: 70,
+                    height: 70,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 20,
+                    fontWeight: 900,
+                    borderRadius: '50%',
+                    background: 'var(--bg-primary, #f0f0f0)',
+                    marginBottom: 8,
+                  }}
+                >
+                  {b.name.slice(0, 2).toUpperCase()}
+                </div>
               )}
-              <div style={{ marginTop: 8, fontWeight: 700 }}>{b.name}</div>
+              <div style={{ marginTop: 4, fontWeight: 700, fontSize: '14px' }}>{b.name}</div>
             </button>
           ))
         ) : (
-          <div style={{ padding: 20, opacity: 0.7 }}>لا توجد ماركة بهذا الاسم</div>
+          <div style={{ padding: 20, opacity: 0.7, gridColumn: '1 / -1', textAlign: 'center' }}>
+            لا توجد ماركة بهذا الاسم
+          </div>
         )}
       </div>
     </div>

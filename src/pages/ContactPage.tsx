@@ -5,6 +5,7 @@ import { Mail, Phone, MapPin, Send, ArrowRight, MessageCircle } from 'lucide-rea
 export default function ContactPage() {
   const navigate = useNavigate();
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
@@ -24,34 +25,34 @@ export default function ContactPage() {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.05 }
     );
 
     elements.forEach((element) => {
-      const alreadyInView = element.getBoundingClientRect().top < window.innerHeight * 0.9;
-      if (alreadyInView) {
-        revealElement(element);
-      } else {
-        observer.observe(element);
-      }
+      observer.observe(element);
     });
 
     return () => observer.disconnect();
   }, []);
 
   const cardStyle = (delay: number): React.CSSProperties => ({
-    padding: '20px',
+    padding: 'clamp(16px, 4vw, 24px)',
     borderRadius: '12px',
     border: '1px solid var(--border)',
     opacity: 0,
-    transform: 'translateY(30px)',
-    transition: `all 0.5s ease ${delay}ms`,
+    transform: 'translateY(20px)',
+    transition: `all 0.4s ease ${delay}ms`,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
+    setLoading(true);
+    
+    setTimeout(() => {
+      setLoading(false);
+      setSent(true);
+      setTimeout(() => setSent(false), 4000);
+    }, 600);
   };
 
   return (
@@ -70,7 +71,7 @@ export default function ContactPage() {
       </nav>
 
       {/* Header */}
-      <header style={{ padding: '40px 16px 20px 16px', textAlign: 'center' }}>
+      <header style={{ padding: '32px 16px 16px 16px', textAlign: 'center' }}>
         <div className="max-w-3xl mx-auto">
           <div className="icon-box icon-box-md" style={{ background: 'rgba(99,102,241,0.12)', color: 'var(--primary)', margin: '0 auto 16px auto', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <MessageCircle size={24} />
@@ -83,60 +84,62 @@ export default function ContactPage() {
       </header>
 
       {/* Content */}
-      <main style={{ padding: '20px 16px 60px 16px' }}>
+      <main style={{ padding: '16px 16px 60px 16px' }}>
         <div className="max-w-3xl mx-auto" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
           {/* Contact Form */}
           <div className="card" data-reveal style={cardStyle(0)}>
             <h3 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '16px' }}>أرسل رسالة</h3>
             {sent ? (
-              <div style={{ textAlign: 'center', padding: 30, background: 'rgba(16,185,129,0.08)', borderRadius: 12, border: '1.5px solid rgba(16,185,129,0.2)' }}>
-                <div style={{ fontSize: 40, marginBottom: 10 }}>✅</div>
-                <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>تم إرسال رسالتك بنجاح!</div>
+              <div style={{ textAlign: 'center', padding: '24px 16px', background: 'rgba(16,185,129,0.08)', borderRadius: 12, border: '1.5px solid rgba(16,185,129,0.2)' }}>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>✅</div>
+                <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>تم إرسال رسالتك بنجاح!</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>سنرد عليك في أقرب وقت ممكن</div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <input className="field-input" placeholder="الاسم الكامل" required />
                 <input className="field-input" type="email" placeholder="البريد الإلكتروني" required />
                 <input className="field-input" placeholder="الموضوع" required />
-                <textarea className="field-input" placeholder="رسالتك..." rows={5} required />
-                <button type="submit" className="btn btn-primary btn-block">
-                  <Send size={16} /> إرسال الرسالة
+                <textarea className="field-input" placeholder="رسالتك..." rows={4} required />
+                <button type="submit" disabled={loading} className="btn btn-primary btn-block">
+                  <Send size={16} /> {loading ? 'جاري الإرسال...' : 'إرسال الرسالة'}
                 </button>
               </form>
             )}
           </div>
 
           {/* Contact Info */}
-          <div data-reveal style={cardStyle(200)} className="card">
+          <div data-reveal style={cardStyle(150)} className="card">
             <h3 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '16px' }}>معلومات الاتصال</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
-                <div className="icon-box icon-box-sm" style={{ background: 'rgba(99,102,241,0.1)', color: 'var(--primary)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
+                <div className="icon-box icon-box-sm" style={{ background: 'rgba(99,102,241,0.1)', color: 'var(--primary)', flexShrink: 0 }}>
                   <Mail size={16} />
                 </div>
-                <div>
+                <div style={{ minWidth: 0, overflow: 'hidden' }}>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>البريد الإلكتروني</div>
-                  <div style={{ fontSize: '14px', fontWeight: 700 }}>contact@serialcotv.dz</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, wordBreak: 'break-all' }}>contact@serialcotv.dz</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
-                <div className="icon-box icon-box-sm" style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--success)' }}>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
+                <div className="icon-box icon-box-sm" style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--success)', flexShrink: 0 }}>
                   <Phone size={16} />
                 </div>
                 <div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>الهاتف</div>
-                  <div style={{ fontSize: '14px', fontWeight: 700 }}>+213 XX XX XX XX</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, direction: 'ltr', textAlign: 'right' }}>+213 XX XX XX XX</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
-                <div className="icon-box icon-box-sm" style={{ background: 'rgba(245,158,11,0.1)', color: 'var(--accent)' }}>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
+                <div className="icon-box icon-box-sm" style={{ background: 'rgba(245,158,11,0.1)', color: 'var(--accent)', flexShrink: 0 }}>
                   <MapPin size={16} />
                 </div>
                 <div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>الموقع</div>
-                  <div style={{ fontSize: '14px', fontWeight: 700 }}>الجزائر</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700 }}>الجزائر</div>
                 </div>
               </div>
             </div>
@@ -145,7 +148,7 @@ export default function ContactPage() {
         </div>
       </main>
 
-      {/* Footer موحد */}
+      {/* Footer */}
       <footer className="reveal" data-reveal style={{ background: 'var(--bg-sidebar)', color: 'var(--text-sidebar)', borderTop: '1px solid var(--border)', padding: '32px 16px 16px 16px' }}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>

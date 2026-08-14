@@ -24,7 +24,7 @@ export default function FAQPage() {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.05 }
     );
 
     elements.forEach((element) => {
@@ -44,10 +44,10 @@ export default function FAQPage() {
     borderRadius: '12px',
     border: '1px solid var(--border)',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    opacity: 0,
-    transform: 'translateY(30px)',
-    animation: `fadeInUp 0.5s ease ${delay}ms forwards`,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    opacity: 1, // تم ضبطه لتجنب الاختفاء إذا لم يوجد كود أنيميشن في CSS
+    transform: 'translateY(0)',
+    transitionDelay: `${delay}ms`,
   });
 
   const toggleAccordion = (index: number) => {
@@ -86,7 +86,7 @@ export default function FAQPage() {
   ];
 
   return (
-    <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', direction: 'rtl', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', direction: 'rtl', minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
       
       {/* Navbar */}
       <nav className="glass sticky top-0 z-50" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', padding: '10px 16px' }}>
@@ -94,40 +94,58 @@ export default function FAQPage() {
           <div className="text-lg font-black tracking-wider cursor-pointer" onClick={() => navigate('/')} style={{ color: 'var(--primary)' }}>
             SERIALCO<span style={{ color: 'var(--accent)' }}>TV</span>
           </div>
-          <button onClick={() => navigate('/')} className="btn btn-ghost text-xs px-3 py-1.5 flex items-center gap-1.5">
+          <button onClick={() => navigate('/')} className="btn btn-ghost text-xs px-3 py-1.5 flex items-center gap-1.5" style={{ cursor: 'pointer' }}>
             <ArrowRight size={14} /><span>العودة للرئيسية</span>
           </button>
         </div>
       </nav>
 
       {/* Header */}
-      <header style={{ padding: '40px 16px 20px 16px', textAlign: 'center' }}>
+      <header style={{ padding: 'clamp(24px, 5vw, 40px) 16px 20px 16px', textAlign: 'center' }}>
         <div className="max-w-3xl mx-auto">
           <div className="icon-box icon-box-md" style={{ background: 'rgba(99,102,241,0.12)', color: 'var(--primary)', margin: '0 auto 16px auto', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <HelpCircle size={24} />
           </div>
-          <h1 style={{ fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 900, marginBottom: '10px', color: 'var(--primary)' }}>الأسئلة الشائعة</h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: 'clamp(20px, 4vw, 30px)', fontWeight: 900, marginBottom: '10px', color: 'var(--primary)' }}>الأسئلة الشائعة</h1>
+          <p style={{ fontSize: 'clamp(12px, 2.5vw, 14px)', color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>
             إجابات واضحة عن كل ما تحتاج معرفته حول منصة SerialcoTV، الاشتراكات، وطريقة التحميل.
           </p>
         </div>
       </header>
 
       {/* FAQ List */}
-      <main style={{ padding: '20px 16px 60px 16px' }}>
+      <main style={{ padding: '10px 16px 60px 16px' }}>
         <div className="max-w-3xl mx-auto" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
-              <div key={index} className="card" data-reveal style={cardStyle(index * 80)} onClick={() => toggleAccordion(index)}>
+              <div 
+                key={index} 
+                className="card" 
+                data-reveal 
+                style={cardStyle(index * 50)} 
+                onClick={() => toggleAccordion(index)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleAccordion(index);
+                  }
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>{faq.question}</h3>
+                  <h3 style={{ fontSize: 'clamp(13px, 3vw, 15px)', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0, lineHeight: '1.5' }}>
+                    {faq.question}
+                  </h3>
                   <ChevronDown size={18} style={{ color: 'var(--primary)', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease', flexShrink: 0 }} />
                 </div>
                 {isOpen && (
                   <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
-                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0 }}>{faq.answer}</p>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0, wordBreak: 'break-word' }}>
+                      {faq.answer}
+                    </p>
                   </div>
                 )}
               </div>
@@ -137,7 +155,7 @@ export default function FAQPage() {
         </div>
       </main>
 
-      {/* Footer موحد */}
+      {/* Footer */}
       <footer className="reveal" data-reveal style={{ background: 'var(--bg-sidebar)', color: 'var(--text-sidebar)', borderTop: '1px solid var(--border)', padding: '32px 16px 16px 16px' }}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
