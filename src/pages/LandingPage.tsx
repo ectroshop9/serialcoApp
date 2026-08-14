@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { 
   CheckCircle, Shield, Star, Zap, Search, ChevronLeft, 
-  Check, Sparkles, Loader2 
+  Check, Sparkles, Loader2, Coins
 } from 'lucide-react';
 import Modal from '../components/UI/Modal';
 import PaymentModal from '../components/PaymentModal';
+
+const API = 'https://serialcotv.onrender.com';
 
 export default function LandingPage() {
   const [showPayment, setShowPayment] = useState(false);
@@ -14,6 +16,7 @@ export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [latestFiles, setLatestFiles] = useState<any[]>([]);
 
   const navigate = useNavigate();
 
@@ -42,6 +45,14 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
+  // جلب أحدث الملفات
+  useEffect(() => {
+    fetch(`${API}/api/content/firmware/`)
+      .then(r => r.json())
+      .then(data => setLatestFiles(data.firmwares || []))
+      .catch(() => setLatestFiles([]));
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const sanitizedQuery = searchQuery.trim();
@@ -54,7 +65,6 @@ export default function LandingPage() {
     }, 400);
   };
 
-  // فتح المودال مباشرة لتخيير المستخدم بين Chargily أو Messenger
   const handleSubscribe = (plan: string) => {
     setSelectedPlan(plan);
     setShowPayment(true);
@@ -98,6 +108,7 @@ export default function LandingPage() {
             ) : (
               <Link to="/login" className="btn btn-ghost text-xs px-3 py-1.5 hidden sm:inline-flex">تسجيل الدخول</Link>
             )}
+            <Link to="/store" className="btn btn-ghost text-xs px-3 py-1.5">المتجر</Link>
             <button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary text-xs px-3 py-1.5">اشترك الآن</button>
           </div>
         </div>
@@ -108,7 +119,7 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto text-center reveal" data-reveal>
           <h1 style={{ fontSize: 'clamp(20px, 3.5vw, 32px)', fontWeight: 900, marginBottom: '12px', lineHeight: 1.35 }}>الحل الجذري لأعطال شاشات LED و Plasma<br /><span style={{ color: 'var(--accent)' }}>في ثوانٍ معدودة.</span></h1>
           <p style={{ fontSize: '13px', color: '#f1f5f9', opacity: 0.9, maxWidth: '550px', margin: '0 auto 20px auto' }}>أول منصة جزائرية موثوقة توفر تحديثات السوفتوير والمخططات الهندسية الدقيقة لأكثر من 10,000 موديل شاشة.</p>
-          <Link to="/products" className="btn btn-accent text-xs py-2.5 px-5 shadow-md" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Link to="/store" className="btn btn-accent text-xs py-2.5 px-5 shadow-md" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <span>تصفح الآن</span><ChevronLeft size={16} />
           </Link>
         </div>
@@ -160,6 +171,51 @@ export default function LandingPage() {
                 <img src={brand.image} alt={brand.name} loading="lazy" style={{ width: '100%', height: '56px', objectFit: 'contain', borderRadius: '10px' }} />
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Available Files Section - جديد */}
+      <section style={{ background: 'var(--bg-primary)', padding: '40px 16px' }}>
+        <div className="max-w-6xl mx-auto">
+          <h2 style={{ fontSize: '22px', fontWeight: 900, textAlign: 'center', marginBottom: '24px', color: 'var(--primary)' }}>
+            أحدث الملفات المتاحة
+          </h2>
+          
+          <div style={{ 
+            display: 'flex', 
+            gap: 16, 
+            overflowX: 'auto', 
+            paddingBottom: 12,
+            scrollbarWidth: 'thin',
+          }}>
+            {latestFiles.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', textAlign: 'center', width: '100%' }}>لا توجد ملفات بعد</p>
+            ) : (
+              latestFiles.slice(0, 10).map((file: any) => (
+                <div key={file.id} style={{ 
+                  minWidth: 220, 
+                  maxWidth: 220,
+                  background: 'var(--bg-card)', 
+                  border: '1px solid var(--border)', 
+                  borderRadius: 14, 
+                  padding: 16,
+                  flexShrink: 0,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+                onClick={() => navigate(`/store/product/${file.id}?type=firmware`)}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>{file.brand__name}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>{file.model_number}</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Coins size={14} /> {file.token_cost} توكن
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
