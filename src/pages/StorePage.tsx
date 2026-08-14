@@ -118,8 +118,7 @@ export default function StorePage() {
       {/* Hero Section */}
       <div style={{ 
         textAlign: 'center', 
-        marginBottom: 12,
-        padding: '40px 20px',
+        padding: '30px 20px',
         background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
         borderRadius: 24,
         color: '#fff',
@@ -127,30 +126,14 @@ export default function StorePage() {
         <h1 style={{ fontSize: 'clamp(28px, 5vw, 40px)', fontWeight: 900, marginBottom: 8 }}>
           مكتبة الملفات
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.9, marginBottom: 24 }}>
+        <p style={{ fontSize: 14, opacity: 0.9 }}>
           سوفتويرات ومخططات محدثة لجميع الماركات
         </p>
-        
-        {/* Stats */}
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '10px 20px', borderRadius: 12, backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: 24, fontWeight: 900 }}>{products.length}</div>
-            <div style={{ fontSize: 11, opacity: 0.9 }}>ملف إجمالي</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '10px 20px', borderRadius: 12, backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: 24, fontWeight: 900 }}>{firmwareCount}</div>
-            <div style={{ fontSize: 11, opacity: 0.9 }}>سوفتوير</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '10px 20px', borderRadius: 12, backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: 24, fontWeight: 900 }}>{schematicCount}</div>
-            <div style={{ fontSize: 11, opacity: 0.9 }}>مخططات</div>
-          </div>
-        </div>
       </div>
 
       {/* Search & Filters */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div className="field" style={{ width: '100%' }}>
+        <div className="field" style={{ width: '100%', position: 'relative' }}>
           <span className="field-icon"><Search /></span>
           <input 
             className="field-input" 
@@ -160,7 +143,7 @@ export default function StorePage() {
             style={{ padding: '14px 40px', fontSize: 15 }}
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'absolute', left: 12 }}>
+            <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }}>
               <X size={18} />
             </button>
           )}
