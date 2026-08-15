@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { 
   CheckCircle, Shield, Star, Zap, Search, ChevronLeft, 
+  Check, Sparkles, Coins
 } from 'lucide-react';
 import Modal from '../components/UI/Modal';
 import PaymentModal from '../components/PaymentModal';
@@ -18,9 +19,6 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) setIsLoggedIn(true);
-
     const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
     if (!elements.length) return;
 
@@ -42,7 +40,6 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  // جلب أحدث الملفات
   useEffect(() => {
     fetch(`${API}/api/content/firmware/`)
       .then(r => r.json())
@@ -54,12 +51,7 @@ export default function LandingPage() {
     e.preventDefault();
     const sanitizedQuery = searchQuery.trim();
     if (!sanitizedQuery) return;
-
-    setIsSearching(true);
-    setTimeout(() => {
-      navigate(`/store?q=${encodeURIComponent(sanitizedQuery)}`);
-      setIsSearching(false);
-    }, 400);
+    navigate(`/store?q=${encodeURIComponent(sanitizedQuery)}`);
   };
 
   const handleSubscribe = (plan: string) => {
@@ -95,7 +87,7 @@ export default function LandingPage() {
         <meta property="og:description" content="حمل أحدث ملفات السوفتوير والمخططات بأسعار تنافسية والدفع عبر بريدي موب أو البطاقة الذهبية." />
       </Helmet>
 
-      {/* Navbar - بسيط ومناسب للهاتف */}
+      {/* Navbar */}
       <nav className="glass sticky top-0 z-50" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', padding: '10px 12px' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
           <div className="text-base font-black tracking-wider cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => navigate('/')}>
@@ -113,7 +105,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Header */}
-      <header className="hero-wrapper reveal" data-reveal style={{ padding: '32px 16px 50px 16px' }}>
+      <header className="hero-wrapper" style={{ padding: '32px 16px 50px 16px' }}>
         <div className="max-w-3xl mx-auto text-center">
           <h1 style={{ fontSize: 'clamp(22px, 5vw, 32px)', fontWeight: 900, marginBottom: '12px', lineHeight: 1.35 }}>
             الحل الجذري لأعطال شاشات LED و Plasma<br />
@@ -122,7 +114,7 @@ export default function LandingPage() {
           <p style={{ fontSize: '13px', color: '#f1f5f9', opacity: 0.9, maxWidth: '550px', margin: '0 auto 20px auto', padding: '0 8px' }}>
             أول منصة جزائرية موثوقة توفر تحديثات السوفتوير والمخططات الهندسية الدقيقة لأكثر من 10,000 موديل شاشة.
           </p>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
             <Link to="/store" className="btn btn-accent btn-sm text-xs py-2.5 px-5" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <span>تصفح الملفات</span><ChevronLeft size={16} />
             </Link>
@@ -159,8 +151,8 @@ export default function LandingPage() {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <div key={index} className="card reveal" data-reveal style={{ padding: '16px 12px', textAlign: 'center' }}>
-                  <div className="icon-box" style={{ background: 'rgba(99,102,241,0.12)', color: 'var(--primary)', margin: '0 auto 10px', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div key={index} className="card" style={{ padding: '16px 12px', textAlign: 'center' }}>
+                  <div style={{ background: 'rgba(99,102,241,0.12)', color: 'var(--primary)', margin: '0 auto 10px', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Icon size={22} />
                   </div>
                   <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '6px' }}>{feature.title}</h3>
@@ -180,7 +172,7 @@ export default function LandingPage() {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {brands.map((brand, index) => (
-              <div key={index} className="card" style={{ padding: '10px 8px', textAlign: 'center', cursor: 'pointer' }}>
+              <div key={index} className="card" style={{ padding: '10px 8px', textAlign: 'center' }}>
                 <img src={brand.image} alt={brand.name} loading="lazy" style={{ width: '100%', height: '50px', objectFit: 'contain', borderRadius: '8px' }} />
               </div>
             ))}
@@ -240,7 +232,6 @@ export default function LandingPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'stretch' }}>
             
-            {/* الباقة الذهبية */}
             <div style={{ background: 'var(--bg-card)', border: '2px solid var(--accent)', borderRadius: '14px', padding: '24px 18px 18px 18px', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 6px 20px rgba(0,0,0,0.06)' }}>
               <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'var(--accent)', color: '#fff', fontSize: '11px', fontWeight: 'bold', padding: '4px 14px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
                 <Sparkles size={12} /><span>الأكثر مبيعاً</span>
@@ -262,7 +253,6 @@ export default function LandingPage() {
               <button onClick={() => handleSubscribe('ذهبية')} className="btn btn-accent btn-block btn-sm text-xs py-2.5" style={{ width: '100%', marginTop: '16px' }}>اشترك الآن</button>
             </div>
 
-            {/* الباقة الفضية */}
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', padding: '24px 18px 18px 18px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold' }}>الباقة الفضية</h3>
