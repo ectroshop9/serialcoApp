@@ -13,6 +13,8 @@ export default function LandingPage() {
   const [showPayment, setShowPayment] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [latestFiles, setLatestFiles] = useState<any[]>([]);
 
   const navigate = useNavigate();
