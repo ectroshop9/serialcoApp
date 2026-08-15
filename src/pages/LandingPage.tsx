@@ -119,7 +119,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Header */}
-      <header className="hero-wrapper" style={{ padding: '32px 16px 50px 16px' }}>
+      <header className="hero-wrapper" style={{ padding: '32px 16px 40px 16px', position: 'relative', zIndex: 1 }}>
         <div className="max-w-3xl mx-auto text-center">
           <h1 style={{ fontSize: 'clamp(22px, 5vw, 32px)', fontWeight: 900, marginBottom: '12px', lineHeight: 1.35 }}>
             الحل الجذري لأعطال شاشات LED و Plasma<br />
@@ -137,7 +137,7 @@ export default function LandingPage() {
       </header>
 
       {/* Search Section */}
-      <section style={{ maxWidth: '600px', margin: '-25px auto 30px auto', padding: '0 12px' }}>
+      <section style={{ maxWidth: '600px', margin: '20px auto 30px auto', padding: '0 12px', position: 'relative', zIndex: 10 }}>
         <div className="card" style={{ padding: '10px 12px', boxShadow: '0 8px 20px rgba(0,0,0,0.06)' }}>
           <form style={{ display: 'flex', gap: '8px' }} onSubmit={handleSearch}>
             <input 
