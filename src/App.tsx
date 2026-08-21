@@ -20,6 +20,7 @@ import ProfilePage from './pages/ProfilePage';
 import StorePage from './pages/StorePage';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import ChatBot from './components/ChatBot/ChatBot';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -59,6 +60,9 @@ export default function App() {
             
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          
+          {/* ✅ البوت يظهر في كل الصفحات */}
+          <ChatBot />
         </HashRouter>
       </AuthProvider>
     </ThemeProvider>
