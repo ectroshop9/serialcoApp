@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Cpu, Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, Coins, Sparkles, Zap, ChevronLeft, Check, User } from 'lucide-react';
+import { Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, Coins, Sparkles, Zap, ChevronLeft, Check, User } from 'lucide-react';
 
 const API = 'https://serialcotv.onrender.com';
 
@@ -56,11 +56,10 @@ export default function LandingPage() {
     navigate(`/store?${params.toString()}`);
   };
 
+  // ✅ التصنيفات - فقط سوفتويرات ومخططات
   const fileTypes = [
     { key: 'firmware', label: 'سوفتويرات', icon: Download, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)' },
     { key: 'schematics', label: 'مخططات', icon: FileText, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)' },
-    { key: 'power_supply', label: 'باور سبلاي', icon: Zap, color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.08)' },
-    { key: 'main_board', label: 'مين بورد', icon: Cpu, color: '#10b981', bg: 'rgba(16, 185, 129, 0.08)' },
   ];
 
   const features = [
@@ -92,7 +91,7 @@ export default function LandingPage() {
       
       {/* هيدر علوي */}
       <nav style={{ background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(226, 232, 240, 0.8)', padding: '14px 20px', position: 'sticky', top: 0, zIndex: 50 }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
           <Link to="/" style={{ textDecoration: 'none', fontSize: 24, fontWeight: 900, letterSpacing: '-0.5px' }}>
             <span style={{ color: '#4f46e5' }}>SerialCo</span><span style={{ color: '#f59e0b' }}>TV</span>
           </Link>
@@ -105,7 +104,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero - صورة ثابتة */}
+      {/* Hero */}
       <header className="hero-banner" style={{ 
         backgroundImage: 'url(/hero.jpg)', 
         backgroundSize: 'cover', 
@@ -133,19 +132,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* تصنيفات المكتبة - أكبر */}
+      {/* تصنيفات المكتبة - فقط 2 */}
       <section style={{ padding: '48px 16px 24px' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
           <h2 data-reveal style={{ fontSize: 'clamp(22px, 4vw, 26px)', fontWeight: 900, textAlign: 'center', marginBottom: 24, color: '#0f172a' }} className="reveal-item">تصنيفات المكتبة</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16, maxWidth: 600, margin: '0 auto' }}>
             {fileTypes.map((type) => {
               const Icon = type.icon;
               return (
-                <button key={type.key} data-reveal onClick={() => navigate(`/store?type=${type.key}`)} className="reveal-item modern-card" style={{ padding: '24px 16px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 18, transition: 'all 0.25s ease', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
-                  <div style={{ background: type.bg, color: type.color, margin: '0 auto 14px', width: 64, height: 64, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Icon size={32} />
+                <button key={type.key} data-reveal onClick={() => navigate(`/store?type=${type.key}`)} className="reveal-item modern-card" style={{ padding: '28px 20px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 18, transition: 'all 0.25s ease', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                  <div style={{ background: type.bg, color: type.color, margin: '0 auto 14px', width: 72, height: 72, borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon size={36} />
                   </div>
-                  <div style={{ fontSize: 17, fontWeight: 800, color: '#1e293b' }}>{type.label}</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: '#1e293b' }}>{type.label}</div>
                 </button>
               );
             })}
@@ -156,7 +155,7 @@ export default function LandingPage() {
       {/* أحدث الملفات */}
       <section style={{ padding: '24px 16px 36px' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
             <div>
               <h2 style={{ fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: 900, color: '#0f172a', margin: 0 }}>أحدث السوفتويرات والمخططات</h2>
               <p style={{ fontSize: 13, color: '#64748b', margin: '4px 0 0 0' }}>ملفات جاهزة ومفحوصة مع تحليلات الشاشة</p>
@@ -176,7 +175,6 @@ export default function LandingPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 14 }}>
               {featuredFiles.map(file => (
                 <div key={file.id} onClick={() => navigate(`/store/product/${file.id}?type=firmware`)} className="file-card" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 12, cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
-                  
                   <div>
                     <div style={{ height: 90, background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', borderRadius: 12, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                       <FileText size={36} style={{ color: '#94a3b8', opacity: 0.8 }} />
@@ -184,16 +182,13 @@ export default function LandingPage() {
                         {file.brand__name || 'Brand'}
                       </span>
                     </div>
-
                     <h3 style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {file.model_number || 'موديل غير معرف'}
                     </h3>
-
                     <div style={{ fontSize: 13, fontWeight: 800, color: '#059669', marginBottom: 12, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#ecfdf5', padding: '3px 8px', borderRadius: 6 }}>
                       <Coins size={13} /> {file.token_cost} توكن
                     </div>
                   </div>
-
                   <button className="download-btn" style={{ width: '100%', background: '#f1f5f9', color: '#334155', border: 'none', padding: '9px 12px', borderRadius: 10, fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.2s ease' }}>
                     <span>تحميل الملف</span>
                     <Download size={14} />
@@ -205,12 +200,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* المميزات - 4 في الصف وأكبر */}
+      {/* المميزات - متجاوب */}
       <section style={{ padding: '36px 16px', background: '#fff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
           <h2 data-reveal style={{ fontSize: 'clamp(20px, 3.5vw, 24px)', fontWeight: 900, textAlign: 'center', marginBottom: 28, color: '#0f172a' }} className="reveal-item">لماذا يفضل الفنيون منصتنا؟</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-            {features.slice(0, 8).map((f, i) => {
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 16 }}>
+            {features.map((f, i) => {
               const Icon = f.icon;
               return (
                 <div key={i} data-reveal className="reveal-item" style={{ padding: 20, textAlign: 'center', background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 16 }}>
@@ -223,47 +218,29 @@ export default function LandingPage() {
               );
             })}
           </div>
-          {/* ✅ للشاشات الصغيرة */}
-          <style>{`
-            @media (max-width: 768px) {
-              .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            }
-            @media (max-width: 480px) {
-              .features-grid { grid-template-columns: 1fr !important; }
-            }
-          `}</style>
         </div>
       </section>
 
-      {/* شبكة الماركات - 5 في الصف وأكبر */}
+      {/* الماركات - متجاوب */}
       <section style={{ padding: '36px 16px' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
           <h2 data-reveal style={{ fontSize: 'clamp(20px, 3.5vw, 24px)', fontWeight: 900, textAlign: 'center', marginBottom: 20 }} className="reveal-item">تصفح حسب الماركة العالمية</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 12 }}>
             {brands.map((brand, i) => (
               <button key={i} data-reveal onClick={() => navigate(`/store?brand=${brand.code}`)} className="reveal-item brand-card" style={{ padding: '16px 10px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 70, transition: 'all 0.2s', fontWeight: 800, fontSize: 15, color: '#334155', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                 <span>{brand.name}</span>
               </button>
             ))}
           </div>
-          <style>{`
-            @media (max-width: 768px) {
-              .brands-grid { grid-template-columns: repeat(3, 1fr) !important; }
-            }
-            @media (max-width: 480px) {
-              .brands-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            }
-          `}</style>
         </div>
       </section>
 
-      {/* الباقات - الذهبية والفضية */}
+      {/* الباقات */}
       <section style={{ padding: '16px 16px 30px' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
           <h2 data-reveal style={{ fontSize: 'clamp(22px, 4vw, 26px)', fontWeight: 900, textAlign: 'center', marginBottom: 24, color: '#0f172a' }} className="reveal-item">اختر الباقة المناسبة</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
             
-            {/* الباقة الذهبية */}
             <div data-reveal className="reveal-item" style={{ background: '#fff', border: '2px solid #f59e0b', borderRadius: 18, padding: '28px 20px', textAlign: 'center', position: 'relative' }}>
               <span style={{ position: 'absolute', top: -14, right: '50%', transform: 'translateX(50%)', background: '#f59e0b', color: '#fff', fontSize: 12, fontWeight: 800, padding: '4px 16px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Sparkles size={14} /> الأكثر مبيعاً
@@ -275,10 +252,9 @@ export default function LandingPage() {
                 <li style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Check size={16} color="#f59e0b" /> مخططات ومستندات كاملة</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Check size={16} color="#f59e0b" /> أولوية في الدعم الفني</li>
               </ul>
-              <Link to="/store" style={{ display: 'block', marginTop: 20, background: '#f59e0b', color: '#fff', padding: '12px', borderRadius: 12, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>اشترك الآن</Link>
+              <button onClick={() => navigate('/payment?plan=gold')} style={{ display: 'block', width: '100%', marginTop: 20, background: '#f59e0b', color: '#fff', padding: '12px', borderRadius: 12, border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>اشترك الآن</button>
             </div>
 
-            {/* الباقة الفضية */}
             <div data-reveal className="reveal-item" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 18, padding: '28px 20px', textAlign: 'center' }}>
               <h3 style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>الباقة الفضية</h3>
               <div style={{ fontSize: 28, fontWeight: 900, color: '#4f46e5', margin: '12px 0' }}>1500 <span style={{ fontSize: 14 }}>دج</span></div>
@@ -287,7 +263,7 @@ export default function LandingPage() {
                 <li style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Check size={16} color="#4f46e5" /> مخططات ومستندات كاملة</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Check size={16} color="#4f46e5" /> صلاحية غير محدودة</li>
               </ul>
-              <Link to="/store" style={{ display: 'block', marginTop: 20, background: '#4f46e5', color: '#fff', padding: '12px', borderRadius: 12, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>اشترك الآن</Link>
+              <button onClick={() => navigate('/payment?plan=silver')} style={{ display: 'block', width: '100%', marginTop: 20, background: '#4f46e5', color: '#fff', padding: '12px', borderRadius: 12, border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>اشترك الآن</button>
             </div>
           </div>
         </div>
@@ -317,19 +293,13 @@ export default function LandingPage() {
       <style>{`
         .hero-banner { height: 260px; }
         @media (min-width: 640px) { .hero-banner { height: 380px; } }
-        
         .reveal-item { opacity: 0; transform: translateY(20px); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         .reveal-item.is-visible { opacity: 1 !important; transform: translateY(0) !important; }
-        
         .modern-card:hover { transform: translateY(-4px); border-color: #818cf8 !important; box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.12) !important; }
-        
         .file-card:hover { transform: translateY(-5px); border-color: #6366f1 !important; box-shadow: 0 16px 25px -5px rgba(15, 23, 42, 0.08) !important; }
         .file-card:hover .download-btn { background: #4f46e5 !important; color: #fff !important; }
-        
         .brand-card:hover { border-color: #4f46e5 !important; color: #4f46e5 !important; transform: translateY(-2px); }
-        
         .btn-glow:hover { opacity: 0.95; transform: scale(1.02); }
-
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
       `}</style>
     </div>

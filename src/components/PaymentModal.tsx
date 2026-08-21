@@ -7,11 +7,11 @@ interface Props {
 
 export default function PaymentModal({ selectedPlan, onClose }: Props) {
   const planConfig: Record<string, { amount: string; icon: typeof Sparkles; color: string; bg: string }> = {
-    'ذهبية': { amount: '3000', icon: Sparkles, color: 'var(--accent, #f59e0b)', bg: 'rgba(245,158,11,0.1)' },
-    'فضية': { amount: '1500', icon: Shield, color: 'var(--primary, #6366f1)', bg: 'rgba(99,102,241,0.1)' },
+    'ذهبية': { amount: '3000', icon: Sparkles, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+    'فضية': { amount: '1500', icon: Shield, color: '#6366f1', bg: 'rgba(99,102,241,0.1)' },
   };
 
-  const plan = planConfig[selectedPlan] || { amount: '1500', icon: Zap, color: 'var(--primary, #6366f1)', bg: 'rgba(99,102,241,0.1)' };
+  const plan = planConfig[selectedPlan] || { amount: '1500', icon: Zap, color: '#6366f1', bg: 'rgba(99,102,241,0.1)' };
   const PlanIcon = plan.icon;
 
   // روابط الدفع لبيئة الاختبار (Sandbox)
@@ -41,15 +41,15 @@ export default function PaymentModal({ selectedPlan, onClose }: Props) {
     >
       <div 
         style={{
-          background: 'var(--bg-card, #18181b)', 
+          background: '#ffffff', 
           borderRadius: 20, 
-          border: '1px solid var(--border, #27272a)',
+          border: '1px solid #e2e8f0',
           padding: 24, 
           width: '100%', 
           maxWidth: 420, 
           position: 'relative',
-          boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5)', 
-          color: 'var(--text-primary, #ffffff)'
+          boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)', 
+          color: '#0f172a'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -62,7 +62,7 @@ export default function PaymentModal({ selectedPlan, onClose }: Props) {
             left: 16, 
             background: 'none', 
             border: 'none',
-            color: 'var(--text-secondary, #a1a1aa)', 
+            color: '#94a3b8', 
             cursor: 'pointer', 
             padding: 4, 
             borderRadius: '50%',
@@ -74,7 +74,7 @@ export default function PaymentModal({ selectedPlan, onClose }: Props) {
           <X size={20} />
         </button>
 
-        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, textAlign: 'center', color: 'var(--text-primary, #fff)' }}>
+        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, textAlign: 'center', color: '#0f172a' }}>
           اختر طريقة الدفع
         </h3>
 
@@ -106,14 +106,14 @@ export default function PaymentModal({ selectedPlan, onClose }: Props) {
             <PlanIcon size={24} style={{ color: '#fff' }} />
           </div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary, #fff)' }}>الباقة {selectedPlan}</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>الباقة {selectedPlan}</div>
             <div style={{ fontSize: 22, fontWeight: 900, color: plan.color }}>{plan.amount} د.ج</div>
           </div>
         </div>
 
         {/* خيارا الدفع */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {/* الخيار 1: Chargily */}
+          {/* الخيار 1: Chargily - البطاقة الذهبية */}
           <a
             href={paymentLinks[selectedPlan] || '#'}
             target="_blank"
@@ -124,7 +124,7 @@ export default function PaymentModal({ selectedPlan, onClose }: Props) {
               gap: 14, 
               padding: '16px 18px',
               borderRadius: 14, 
-              background: 'var(--accent, #f59e0b)', 
+              background: '#f59e0b', 
               color: '#fff',
               textDecoration: 'none', 
               fontWeight: 700, 
@@ -132,12 +132,11 @@ export default function PaymentModal({ selectedPlan, onClose }: Props) {
             }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-              <rect x="2" y="4" width="20" height="16" rx="3" fill="#fff" stroke="#fff" strokeWidth="1"/>
-              <rect x="2" y="4" width="20" height="16" rx="3" fill="url(#gold)"/>
+              <rect x="2" y="4" width="20" height="16" rx="3" fill="url(#goldGradient)"/>
               <line x1="2" y1="10" x2="22" y2="10" stroke="#fff" strokeWidth="0.5" opacity="0.5"/>
               <line x1="6" y1="15" x2="12" y2="15" stroke="#fff" strokeWidth="1.5" opacity="0.8"/>
               <defs>
-                <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+                <linearGradient id="goldGradient" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%" stopColor="#FFD700"/>
                   <stop offset="100%" stopColor="#FFA500"/>
                 </linearGradient>
@@ -145,11 +144,11 @@ export default function PaymentModal({ selectedPlan, onClose }: Props) {
             </svg>
             <div>
               <div>الدفع بالبطاقة الذهبية / CIB</div>
-              <div style={{ fontSize: 11, opacity: 0.8, fontWeight: 400 }}>تحويل آمن وسريع عبر Chargily</div>
+              <div style={{ fontSize: 11, opacity: 0.85, fontWeight: 400 }}>تحويل آمن وسريع عبر Chargily</div>
             </div>
           </a>
 
-          {/* الخيار 2: Messenger */}
+          {/* الخيار 2: بريدي موب */}
           <a
             href="https://m.me/serialcotv"
             target="_blank"
@@ -160,7 +159,7 @@ export default function PaymentModal({ selectedPlan, onClose }: Props) {
               gap: 14, 
               padding: '16px 18px',
               borderRadius: 14, 
-              background: 'linear-gradient(135deg, #0084FF 0%, #00C6FF 100%)',
+              background: '#e11d48',
               color: '#fff', 
               textDecoration: 'none', 
               fontWeight: 700, 
@@ -171,8 +170,8 @@ export default function PaymentModal({ selectedPlan, onClose }: Props) {
               <path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.45 5.513 3.714 7.214V22l3.355-1.843c.928.257 1.91.397 2.931.397 5.523 0 10-4.145 10-9.296C22 6.145 17.523 2 12 2zm1.193 12.48l-2.556-2.727-4.99 2.727 5.49-5.823 2.622 2.727 4.925-2.727-5.491 5.823z" />
             </svg>
             <div>
-              <div>الاستمرار عبر Messenger</div>
-              <div style={{ fontSize: 11, opacity: 0.9, fontWeight: 400 }}>للدفع عبر بريدي موب وتأكيد الاشتراك</div>
+              <div>الدفع عبر بريدي موب</div>
+              <div style={{ fontSize: 11, opacity: 0.9, fontWeight: 400 }}>تواصل معنا للدفع عبر CCP مع إرفاق السيريال</div>
             </div>
           </a>
         </div>
