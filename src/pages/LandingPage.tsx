@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Cpu, Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, Coins, Sparkles, Zap, ChevronLeft } from 'lucide-react';
+import { Cpu, Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, Coins, Sparkles, Zap, ChevronLeft, Check, User } from 'lucide-react';
 
 const API = 'https://serialcotv.onrender.com';
 
@@ -83,6 +83,8 @@ export default function LandingPage() {
     { name: 'Stream', code: 'stream' },
     { name: 'Maxtor', code: 'maxtor' },
     { name: 'Kiowa', code: 'kiowa' },
+    { name: 'TCL', code: 'tcl' },
+    { name: 'Toshiba', code: 'toshiba' },
   ];
 
   return (
@@ -94,11 +96,16 @@ export default function LandingPage() {
           <Link to="/" style={{ textDecoration: 'none', fontSize: 24, fontWeight: 900, letterSpacing: '-0.5px' }}>
             <span style={{ color: '#4f46e5' }}>SerialCo</span><span style={{ color: '#f59e0b' }}>TV</span>
           </Link>
-          <Link to="/store" className="btn-glow" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)', color: '#fff', padding: '9px 20px', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 14, transition: 'all 0.3s ease' }}>المتجر</Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Link to="/login" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#334155', textDecoration: 'none', fontWeight: 700, fontSize: 13, padding: '8px 14px', borderRadius: 10, background: '#f1f5f9', border: '1px solid #e2e8f0' }}>
+              <User size={16} /> دخول
+            </Link>
+            <Link to="/store" className="btn-glow" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)', color: '#fff', padding: '9px 20px', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 14, transition: 'all 0.3s ease' }}>المتجر</Link>
+          </div>
         </div>
       </nav>
 
-      {/* ✅ Hero - صورة ثابتة بدون سلايدر وبدون تظليل */}
+      {/* Hero - صورة ثابتة */}
       <header className="hero-banner" style={{ 
         backgroundImage: 'url(/hero.jpg)', 
         backgroundSize: 'cover', 
@@ -126,19 +133,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* أنواع الملفات */}
+      {/* تصنيفات المكتبة - أكبر */}
       <section style={{ padding: '48px 16px 24px' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
-          <h2 data-reveal style={{ fontSize: 'clamp(20px, 4vw, 24px)', fontWeight: 900, textAlign: 'center', marginBottom: 24, color: '#0f172a' }} className="reveal-item">تصنيفات المكتبة</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+          <h2 data-reveal style={{ fontSize: 'clamp(22px, 4vw, 26px)', fontWeight: 900, textAlign: 'center', marginBottom: 24, color: '#0f172a' }} className="reveal-item">تصنيفات المكتبة</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
             {fileTypes.map((type) => {
               const Icon = type.icon;
               return (
-                <button key={type.key} data-reveal onClick={() => navigate(`/store?type=${type.key}`)} className="reveal-item modern-card" style={{ padding: '18px 14px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, transition: 'all 0.25s ease', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
-                  <div style={{ background: type.bg, color: type.color, margin: '0 auto 12px', width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Icon size={26} />
+                <button key={type.key} data-reveal onClick={() => navigate(`/store?type=${type.key}`)} className="reveal-item modern-card" style={{ padding: '24px 16px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 18, transition: 'all 0.25s ease', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                  <div style={{ background: type.bg, color: type.color, margin: '0 auto 14px', width: 64, height: 64, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon size={32} />
                   </div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: '#1e293b' }}>{type.label}</div>
+                  <div style={{ fontSize: 17, fontWeight: 800, color: '#1e293b' }}>{type.label}</div>
                 </button>
               );
             })}
@@ -198,61 +205,99 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* المميزات */}
+      {/* المميزات - 4 في الصف وأكبر */}
       <section style={{ padding: '36px 16px', background: '#fff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
-          <h2 data-reveal style={{ fontSize: 'clamp(18px, 3.5vw, 22px)', fontWeight: 900, textAlign: 'center', marginBottom: 28, color: '#0f172a' }} className="reveal-item">لماذا يفضل الفنيون منصتنا؟</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
-            {features.map((f, i) => {
+          <h2 data-reveal style={{ fontSize: 'clamp(20px, 3.5vw, 24px)', fontWeight: 900, textAlign: 'center', marginBottom: 28, color: '#0f172a' }} className="reveal-item">لماذا يفضل الفنيون منصتنا؟</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+            {features.slice(0, 8).map((f, i) => {
               const Icon = f.icon;
               return (
-                <div key={i} data-reveal className="reveal-item" style={{ padding: 16, textAlign: 'center', background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 14 }}>
-                  <div style={{ background: '#e0e7ff', color: '#4f46e5', width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
-                    <Icon size={22} />
+                <div key={i} data-reveal className="reveal-item" style={{ padding: 20, textAlign: 'center', background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 16 }}>
+                  <div style={{ background: '#e0e7ff', color: '#4f46e5', width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                    <Icon size={26} />
                   </div>
-                  <h3 style={{ fontSize: 14, fontWeight: 800, marginBottom: 4, color: '#0f172a' }}>{f.title}</h3>
+                  <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 6, color: '#0f172a' }}>{f.title}</h3>
                   <p style={{ fontSize: 12, color: '#64748b', margin: 0, lineHeight: 1.5 }}>{f.description}</p>
                 </div>
               );
             })}
           </div>
+          {/* ✅ للشاشات الصغيرة */}
+          <style>{`
+            @media (max-width: 768px) {
+              .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            }
+            @media (max-width: 480px) {
+              .features-grid { grid-template-columns: 1fr !important; }
+            }
+          `}</style>
         </div>
       </section>
 
-      {/* شبكة الماركات */}
+      {/* شبكة الماركات - 5 في الصف وأكبر */}
       <section style={{ padding: '36px 16px' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
-          <h2 data-reveal style={{ fontSize: 'clamp(18px, 3.5vw, 22px)', fontWeight: 900, textAlign: 'center', marginBottom: 20 }} className="reveal-item">تصفح حسب الماركة العالمية</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 12 }}>
+          <h2 data-reveal style={{ fontSize: 'clamp(20px, 3.5vw, 24px)', fontWeight: 900, textAlign: 'center', marginBottom: 20 }} className="reveal-item">تصفح حسب الماركة العالمية</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
             {brands.map((brand, i) => (
-              <button key={i} data-reveal onClick={() => navigate(`/store?brand=${brand.code}`)} className="reveal-item brand-card" style={{ padding: '12px 8px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 60, transition: 'all 0.2s', fontWeight: 800, fontSize: 13, color: '#334155', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+              <button key={i} data-reveal onClick={() => navigate(`/store?brand=${brand.code}`)} className="reveal-item brand-card" style={{ padding: '16px 10px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 70, transition: 'all 0.2s', fontWeight: 800, fontSize: 15, color: '#334155', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                 <span>{brand.name}</span>
               </button>
             ))}
           </div>
+          <style>{`
+            @media (max-width: 768px) {
+              .brands-grid { grid-template-columns: repeat(3, 1fr) !important; }
+            }
+            @media (max-width: 480px) {
+              .brands-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            }
+          `}</style>
         </div>
       </section>
 
-      {/* الباقات */}
-      <section style={{ padding: '16px 16px 20px' }}>
-        <div data-reveal className="reveal-item" style={{ maxWidth: 880, margin: '0 auto', background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)', border: '1px solid #c7d2fe', borderRadius: 20, padding: '24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-          <div style={{ flex: '1 1 260px' }}>
-            <span style={{ background: '#4f46e5', color: '#fff', fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 12, display: 'inline-block', marginBottom: 8 }}>وفّر أكثر</span>
-            <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1e1b4b', margin: '0 0 6px 0' }}>باقات الرصيد والتوكنز</h3>
-            <p style={{ fontSize: 13, color: '#4338ca', margin: 0, lineHeight: 1.5 }}>اشحن حسابك بالتوكنز واستفد من خصومات التحميل اليومية على المخططات والسوفتويرات.</p>
+      {/* الباقات - الذهبية والفضية */}
+      <section style={{ padding: '16px 16px 30px' }}>
+        <div style={{ maxWidth: 880, margin: '0 auto' }}>
+          <h2 data-reveal style={{ fontSize: 'clamp(22px, 4vw, 26px)', fontWeight: 900, textAlign: 'center', marginBottom: 24, color: '#0f172a' }} className="reveal-item">اختر الباقة المناسبة</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+            
+            {/* الباقة الذهبية */}
+            <div data-reveal className="reveal-item" style={{ background: '#fff', border: '2px solid #f59e0b', borderRadius: 18, padding: '28px 20px', textAlign: 'center', position: 'relative' }}>
+              <span style={{ position: 'absolute', top: -14, right: '50%', transform: 'translateX(50%)', background: '#f59e0b', color: '#fff', fontSize: 12, fontWeight: 800, padding: '4px 16px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Sparkles size={14} /> الأكثر مبيعاً
+              </span>
+              <h3 style={{ fontSize: 18, fontWeight: 900, color: '#0f172a', marginTop: 8 }}>الباقة الذهبية</h3>
+              <div style={{ fontSize: 28, fontWeight: 900, color: '#f59e0b', margin: '12px 0' }}>3000 <span style={{ fontSize: 14 }}>دج</span></div>
+              <ul style={{ listStyle: 'none', padding: 0, fontSize: 13, color: '#64748b', textAlign: 'right' }}>
+                <li style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Check size={16} color="#f59e0b" /> 3,000 توكن</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Check size={16} color="#f59e0b" /> مخططات ومستندات كاملة</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Check size={16} color="#f59e0b" /> أولوية في الدعم الفني</li>
+              </ul>
+              <Link to="/store" style={{ display: 'block', marginTop: 20, background: '#f59e0b', color: '#fff', padding: '12px', borderRadius: 12, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>اشترك الآن</Link>
+            </div>
+
+            {/* الباقة الفضية */}
+            <div data-reveal className="reveal-item" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 18, padding: '28px 20px', textAlign: 'center' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>الباقة الفضية</h3>
+              <div style={{ fontSize: 28, fontWeight: 900, color: '#4f46e5', margin: '12px 0' }}>1500 <span style={{ fontSize: 14 }}>دج</span></div>
+              <ul style={{ listStyle: 'none', padding: 0, fontSize: 13, color: '#64748b', textAlign: 'right' }}>
+                <li style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Check size={16} color="#4f46e5" /> 1,500 توكن</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Check size={16} color="#4f46e5" /> مخططات ومستندات كاملة</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Check size={16} color="#4f46e5" /> صلاحية غير محدودة</li>
+              </ul>
+              <Link to="/store" style={{ display: 'block', marginTop: 20, background: '#4f46e5', color: '#fff', padding: '12px', borderRadius: 12, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>اشترك الآن</Link>
+            </div>
           </div>
-          <Link to="/store" className="btn-glow" style={{ background: '#4f46e5', color: '#fff', padding: '12px 24px', borderRadius: 12, textDecoration: 'none', fontWeight: 800, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap', boxShadow: '0 6px 20px rgba(79, 70, 229, 0.3)' }}>
-            <Sparkles size={16} />
-            <span>عرض الباقات</span>
-          </Link>
         </div>
       </section>
 
       {/* دعوة للتحميل */}
       <section style={{ padding: '24px 16px 40px' }}>
-        <div data-reveal className="reveal-item" style={{ maxWidth: 880, margin: '0 auto', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: 20, padding: '36px 24px', textAlign: 'center', color: '#fff', boxShadow: '0 20px 25px -5px rgba(15, 23, 42, 0.2)' }}>
+        <div data-reveal className="reveal-item" style={{ maxWidth: 880, margin: '0 auto', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: 20, padding: '36px 24px', textAlign: 'center', color: '#fff' }}>
           <h2 style={{ fontSize: 'clamp(20px, 4vw, 26px)', fontWeight: 900, color: '#f59e0b', marginBottom: 10 }}>تبحث عن ملف محدد؟</h2>
-          <p style={{ color: '#94a3b8', marginBottom: 24, fontSize: 14, maxWidth: 500, margin: '0 auto 24px' }}>نوفر أضخم قاعدة بيانات للسوفتويرات النادرة والمخططات في الجزائر والوطن العربي.</p>
+          <p style={{ color: '#94a3b8', marginBottom: 24, fontSize: 14 }}>نوفر أضخم قاعدة بيانات للسوفتويرات النادرة والمخططات في الجزائر.</p>
           <Link to="/store" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)', color: '#fff', padding: '12px 28px', borderRadius: 12, textDecoration: 'none', fontWeight: 800, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <span>تصفح كل المكتبة</span>
             <ArrowRight size={16} style={{ transform: 'rotate(180deg)' }} />
