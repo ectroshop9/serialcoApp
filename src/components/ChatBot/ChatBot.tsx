@@ -13,17 +13,27 @@ interface Message {
   buttons?: string[] | null;
 }
 
-interface PackageData {
+interface FirmwareData {
   id: number;
-  name: string;
-  tokens_limit: number;
-  price: string;
+  brand__name: string;
+  model_number: string;
+  version: string;
+  token_cost: number;
+}
+
+interface SchematicData {
+  id: number;
+  brand__name: string;
+  model_number: string;
+  title: string;
+  token_cost: number;
 }
 
 const BUTTON_STYLES: Array<{ prefix: string; bg: string; color: string; border: string }> = [
-  { prefix: '🛍️', bg: '#dbeafe', color: '#1d4ed8', border: '1px solid #93c5fd' },
-  { prefix: '🔑', bg: '#fef3c7', color: '#b45309', border: '1px solid #fcd34d' },
-  { prefix: '💰', bg: '#d1fae5', color: '#047857', border: '1px solid #6ee7b7' },
+  { prefix: '📺', bg: '#dbeafe', color: '#1d4ed8', border: '1px solid #93c5fd' },
+  { prefix: '📐', bg: '#fef3c7', color: '#b45309', border: '1px solid #fcd34d' },
+  { prefix: '🔑', bg: '#d1fae5', color: '#047857', border: '1px solid #6ee7b7' },
+  { prefix: '💰', bg: '#cffafe', color: '#0e7490', border: '1px solid #67e8f9' },
   { prefix: '❓', bg: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' },
   { prefix: '🔙', bg: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' }
 ];
@@ -38,8 +48,9 @@ const MAIN_MENU: Message = {
   type: 'bot',
   text: '👋 أهلاً بك في SerialCo! كيف يمكنني مساعدتك؟',
   buttons: [
-    '🛍️ تصفح الباقات',
-    '🔑 التحقق من سيريال',
+    '📺 تصفح السوفتويرات',
+    '📐 تصفح المخططات',
+    '🔑 ربط سيريال',
     '💰 رصيدي',
     '❓ مساعدة'
   ]
@@ -79,41 +90,56 @@ export default function ChatBot() {
     setTyping(false);
   };
 
-  const fetchPackages = async (): Promise<PackageData[]> => {
+  // ✅ جلب السوفتويرات
+  const fetchFirmware = async (): Promise<FirmwareData[]> => {
     try {
-      const res = await fetch(`${API}/api/serials/packages/`);
+      const res = await fetch(`${API}/api/content/firmware/`);
       const data = await res.json();
-      return data.packages || [];
+      return data.firmwares || [];
     } catch {
       return [];
     }
   };
 
-  const checkSerial = async (serialNumber: string, pin: string): Promise<any> => {
+  // ✅ جلب المخططات
+  const fetchSchematics = async (): Promise<SchematicData[]> => {
     try {
-      const res = await fetch(`${API}/api/serials/check/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serial_number: serialNumber, pin })
-      });
-      return await res.json();
+      const res = await fetch(`${API}/api/content/schematics/`);
+      const data = await res.json();
+      return data.schematics || [];
     } catch {
-      return { success: false, message: 'خطأ في الاتصال' };
+      return [];
     }
   };
 
-  const activateSerial = async (serialNumber: string, pin: string): Promise<any> => {
-    if (!user) return { success: false, message: 'يجب تسجيل الدخول أولاً' };
-    
+  // ✅ جلب رصيد العميل
+  const fetchProfile = async (): Promise<any> => {
     const token = localStorage.getItem('access_token');
+    if (!token) return null;
     try {
-      const res = await fetch(`${API}/api/serials/activate/`, {
+      const res = await fetch(`${API}/api/accounts/profile/`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
+
+  // ✅ ربط سيريال
+  const linkSerial = async (serialNumber: string, pin: string): Promise<any> => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return { success: false, message: 'يجب تسجيل الدخول' };
+    
+    try {
+      const res = await fetch(`${API}/api/accounts/link-serial/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ serial_number: serialNumber, pin, customer_id: user.id })
+        body: JSON.stringify({ serial_number: serialNumber, pin })
       });
       return await res.json();
     } catch {
@@ -139,7 +165,8 @@ export default function ChatBot() {
     addMessage('user', messageText);
     setInput('');
 
-    if (awaitingState === 'serial_check') {
+    // ✅ ربط سيريال
+    if (awaitingState === 'link_serial') {
       const parts = messageText.trim().split(/[\s-]+/);
       if (parts.length < 2) {
         await botTyping();
@@ -152,103 +179,101 @@ export default function ChatBot() {
       const pin = parts[parts.length - 1];
       
       await botTyping();
-      const data = await checkSerial(serialNumber, pin);
+      const data = await linkSerial(serialNumber, pin);
       
       if (data.success) {
-        addMessage('bot', `✅ السيريال صحيح!\n\n📦 الباقة: ${data.serial?.package || 'غير معروف'}\n💰 التوكنز المتبقية: ${data.serial?.tokens_remaining || 0}`, ['🔑 تفعيل السيريال', '🔙 القائمة الرئيسية']);
+        addMessage('bot', `✅ تم ربط السيريال!\n💰 التوكنز المضافة: ${data.tokens_added || 0}\n💰 الرصيد الكلي: ${data.total_balance || 0}`, ['💰 رصيدي', '🔙 القائمة الرئيسية']);
       } else {
-        addMessage('bot', `❌ ${data.message || 'سيريال غير صحيح'}`, ['🔑 التحقق من سيريال', '🔙 القائمة الرئيسية']);
+        addMessage('bot', `❌ ${data.message || 'فشل الربط'}`, ['🔑 ربط سيريال', '🔙 القائمة الرئيسية']);
       }
       setAwaitingState(null);
       return;
     }
 
-    if (awaitingState === 'serial_activate') {
-      const parts = messageText.trim().split(/[\s-]+/);
-      if (parts.length < 2) {
+    // ✅ تصفح السوفتويرات
+    if (messageText.includes('السوفتويرات')) {
+      await botTyping();
+      const firmwares = await fetchFirmware();
+      
+      if (firmwares.length > 0) {
+        let text = '📺 السوفتويرات المتاحة:\n\n';
+        firmwares.slice(0, 5).forEach(f => {
+          text += `• ${f.brand__name} - ${f.model_number} (v${f.version || '?'})\n   🔑 ${f.token_cost} توكن\n\n`;
+        });
+        addMessage('bot', text, ['📐 تصفح المخططات', '🔙 القائمة الرئيسية']);
+      } else {
+        addMessage('bot', '❌ لا توجد سوفتويرات حالياً', ['🔙 القائمة الرئيسية']);
+      }
+      return;
+    }
+
+    // ✅ تصفح المخططات
+    if (messageText.includes('المخططات')) {
+      await botTyping();
+      const schematics = await fetchSchematics();
+      
+      if (schematics.length > 0) {
+        let text = '📐 المخططات المتاحة:\n\n';
+        schematics.slice(0, 5).forEach(s => {
+          text += `• ${s.brand__name} - ${s.title}\n   🔑 ${s.token_cost} توكن\n\n`;
+        });
+        addMessage('bot', text, ['📺 تصفح السوفتويرات', '🔙 القائمة الرئيسية']);
+      } else {
+        addMessage('bot', '❌ لا توجد مخططات حالياً', ['🔙 القائمة الرئيسية']);
+      }
+      return;
+    }
+
+    // ✅ ربط سيريال
+    if (messageText.includes('ربط سيريال')) {
+      if (!isAuthenticated) {
         await botTyping();
-        addMessage('bot', '❌ يرجى إرسال السيريال والبين', ['🔙 القائمة الرئيسية']);
-        setAwaitingState(null);
+        addMessage('bot', '❌ يجب تسجيل الدخول أولاً لربط السيريال', ['🔙 القائمة الرئيسية']);
         return;
       }
-      
-      const serialNumber = parts[0];
-      const pin = parts[parts.length - 1];
-      
-      await botTyping();
-      const data = await activateSerial(serialNumber, pin);
-      
-      if (data.success) {
-        addMessage('bot', `✅ تم تفعيل السيريال!\n💰 التوكنز: ${data.serial?.tokens_remaining || 0}`, ['💰 رصيدي', '🔙 القائمة الرئيسية']);
-      } else {
-        addMessage('bot', `❌ ${data.message || 'فشل التفعيل'}`, ['🔙 القائمة الرئيسية']);
-      }
-      setAwaitingState(null);
-      return;
-    }
-
-    if (messageText.includes('تصفح الباقات')) {
-      await botTyping();
-      const packages = await fetchPackages();
-      
-      if (packages.length > 0) {
-        let pkgText = '🛍️ الباقات المتاحة:\n\n';
-        packages.forEach(p => {
-          pkgText += `📦 ${p.name}\n💰 ${p.price} دج\n🔑 ${p.tokens_limit} توكن\n\n`;
-        });
-        addMessage('bot', pkgText, ['🔑 التحقق من سيريال', '🔙 القائمة الرئيسية']);
-      } else {
-        addMessage('bot', '❌ لا توجد باقات متاحة حالياً', ['🔙 القائمة الرئيسية']);
-      }
-      return;
-    }
-
-    if (messageText.includes('التحقق من سيريال')) {
-      setAwaitingState('serial_check');
+      setAwaitingState('link_serial');
       await botTyping();
       addMessage('bot', '🔑 أرسل السيريال والبين هكذا:\nSC12345678901234 1234');
       return;
     }
 
-    if (messageText.includes('تفعيل السيريال')) {
-      if (!isAuthenticated) {
-        await botTyping();
-        addMessage('bot', '❌ يجب تسجيل الدخول أولاً لتفعيل السيريال', ['🔙 القائمة الرئيسية']);
-        return;
-      }
-      setAwaitingState('serial_activate');
-      await botTyping();
-      addMessage('bot', '🔑 أرسل السيريال والبين للتفعيل:');
-      return;
-    }
-
+    // ✅ رصيدي
     if (messageText.includes('رصيدي')) {
-      if (!isAuthenticated || !user) {
+      if (!isAuthenticated) {
         await botTyping();
         addMessage('bot', '❌ يجب تسجيل الدخول لعرض رصيدك', ['🔙 القائمة الرئيسية']);
         return;
       }
       await botTyping();
-      addMessage('bot', `💰 رصيدك الحالي:\n\n👤 ${user.name}`, ['🔙 القائمة الرئيسية']);
+      const data = await fetchProfile();
+      if (data && data.success) {
+        addMessage('bot', `💰 رصيدك:\n\n👤 ${data.customer?.name || user?.name}\n🔑 التوكنز: ${data.customer?.token_balance || 0}`, ['🔙 القائمة الرئيسية']);
+      } else {
+        addMessage('bot', `💰 رصيدك: ${user?.name || 'غير معروف'}`, ['🔙 القائمة الرئيسية']);
+      }
       return;
     }
 
+    // ✅ مساعدة
     if (messageText.includes('مساعدة')) {
       await showHelpMenu();
       return;
     }
 
+    // ✅ اتصل بنا
     if (messageText.includes('اتصل بنا')) {
       await botTyping();
       addMessage('bot', '📞 تواصل معنا:\n📱 الهاتف: 0673310066\n📧 الإيميل: contact@serialco.tv', ['🔙 القائمة الرئيسية']);
       return;
     }
 
+    // ✅ القائمة الرئيسية
     if (messageText.includes('القائمة الرئيسية')) {
       await showMainMenu();
       return;
     }
 
+    // ✅ ترحيب
     if (['سلام', 'مرحبا', 'اهلا', 'hi', 'hello'].some(g => messageText.toLowerCase().includes(g))) {
       await showMainMenu();
       return;
