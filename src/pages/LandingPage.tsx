@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Cpu, Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, MessageCircle, Coins, Sparkles, Zap } from 'lucide-react';
+import { Cpu, Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, Coins, Sparkles, Zap } from 'lucide-react';
 
 const API = 'https://serialcotv.onrender.com';
 
@@ -11,8 +11,6 @@ export default function LandingPage() {
   const [searchBrand, setSearchBrand] = useState('ALL');
   const [featuredFiles, setFeaturedFiles] = useState<any[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(true);
-
-  const PAGE_ID = "61593351994312";
 
   const slides = [
     { image: '/hero/firmware.jpg' },
@@ -89,14 +87,14 @@ export default function LandingPage() {
   ];
 
   const brands = [
-    { name: 'Samsung', code: 'samsung', image: '/brands/samsung.png' },
-    { name: 'LG', code: 'lg', image: '/brands/lg.png' },
-    { name: 'Condor', code: 'condor', image: '/brands/condor.png' },
-    { name: 'Iris', code: 'iris', image: '/brands/iris.png' },
-    { name: 'Geant', code: 'geant', image: '/brands/geant.png' },
-    { name: 'Stream', code: 'stream', image: '/brands/stream.png' },
-    { name: 'Maxtor', code: 'maxtor', image: '/brands/maxtor.png' },
-    { name: 'Kiowa', code: 'kiowa', image: '/brands/kiowa.png' },
+    { name: 'Samsung', code: 'samsung' },
+    { name: 'LG', code: 'lg' },
+    { name: 'Condor', code: 'condor' },
+    { name: 'Iris', code: 'iris' },
+    { name: 'Geant', code: 'geant' },
+    { name: 'Stream', code: 'stream' },
+    { name: 'Maxtor', code: 'maxtor' },
+    { name: 'Kiowa', code: 'kiowa' },
   ];
 
   return (
@@ -172,6 +170,8 @@ export default function LandingPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
               {[1, 2, 3, 4, 5].map(n => <div key={n} style={{ background: '#fff', height: 220, borderRadius: 12, border: '1px solid #e2e8f0', animation: 'pulse 1.5s infinite ease-in-out' }} />)}
             </div>
+          ) : featuredFiles.length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#64748b', fontSize: 13 }}>لا توجد ملفات بعد</p>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
               {featuredFiles.map(file => (
