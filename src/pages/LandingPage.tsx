@@ -1,181 +1,211 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { 
-  CheckCircle, Shield, Star, Zap, Search , 
-  Check, Sparkles, Coins, Loader2 
-} from 'lucide-react';
-import Modal from '../components/UI/Modal';
-import PaymentModal from '../components/PaymentModal';
+import { Cpu, Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, MessageCircle, Coins, Sparkles } from 'lucide-react';
 
 const API = 'https://serialcotv.onrender.com';
 
 export default function LandingPage() {
-  const [showPayment, setShowPayment] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState('');
+  const navigate = useNavigate();
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [latestFiles, setLatestFiles] = useState<any[]>([]);
+  const [searchBrand, setSearchBrand] = useState('ALL');
+  const [featuredFiles, setFeaturedFiles] = useState([]);
   const [loadingFiles, setLoadingFiles] = useState(true);
 
-  const navigate = useNavigate();
+  const PAGE_ID = "61593351994312";
+
+  const slides = [
+    { image: '/hero/firmware.jpg' },
+    { image: '/hero/schematics.jpg' },
+    { image: '/hero/updates.jpg' },
+  ];
 
   useEffect(() => {
-    const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    let isMounted = true;
+    fetch(`${API}/api/content/firmware/`)
+      .then(r => r.json())
+      .then(data => {
+        if (isMounted && data?.success) setFeaturedFiles((data.firmwares || []).slice(0, 5));
+      })
+      .finally(() => { if (isMounted) setLoadingFiles(false); });
+    return () => { isMounted = false; };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentSlide((prev) => (prev + 1) % slides.length), 4500);
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll('[data-reveal]'));
     if (!elements.length) return;
-
-    const revealElement = (element: HTMLElement) => { element.classList.add('is-visible'); };
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
+      entries.forEach(entry => { 
         if (entry.isIntersecting) { 
-          revealElement(entry.target as HTMLElement); 
+          entry.target.classList.add('is-visible'); 
           observer.unobserve(entry.target); 
-        }
+        } 
       });
-    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.1 });
 
-    elements.forEach((element) => {
-      const alreadyInView = element.getBoundingClientRect().top < window.innerHeight * 0.9;
-      if (alreadyInView) { revealElement(element); } else { observer.observe(element); }
+    elements.forEach(el => { 
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.9) {
+        el.classList.add('is-visible');
+      } else {
+        observer.observe(el);
+      }
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [featuredFiles, loadingFiles]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    setLoadingFiles(true);
-
-    fetch(`${API}/api/content/firmware/`, { signal: controller.signal })
-      .then(r => r.json())
-      .then(data => {
-        setLatestFiles(data.firmwares || []);
-        setLoadingFiles(false);
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') {
-          setLatestFiles([]);
-          setLoadingFiles(false);
-        }
-      });
-
-    return () => controller.abort();
-  }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e) => {
     e.preventDefault();
-    const sanitizedQuery = searchQuery.trim();
-    if (!sanitizedQuery) return;
-    navigate(`/store?q=${encodeURIComponent(sanitizedQuery)}`);
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.append('q', searchQuery.trim());
+    if (searchBrand !== 'ALL') params.append('brand', searchBrand);
+    navigate(`/store?${params.toString()}`);
   };
 
-  const handleSubscribe = (plan: string) => {
-    setSelectedPlan(plan);
-    setShowPayment(true);
-  };
-
-  const brands = [
-    { name: 'Samsung', image: '/brands/samsung.png' },
-    { name: 'LG', image: '/brands/lg.png' },
-    { name: 'Geant', image: '/brands/geant.png' },
-    { name: 'Condor', image: '/brands/condor.png' },
-    { name: 'Iris', image: '/brands/iris-logo.png' },
-    { name: 'Stream', image: '/brands/stream.png' },
-    { name: 'maxtor', image: '/brands/maxtor.png' },
-    { name: 'kiowa', image: '/brands/kiowa.png' },
+  const fileTypes = [
+    { key: 'firmware', label: 'سوفتويرات', icon: Download, color: '#3b82f6' },
+    { key: 'schematics', label: 'مخططات', icon: FileText, color: '#f59e0b' },
+    { key: 'power_supply', label: 'باور سبلاي', icon: Zap, color: '#6366f1' },
+    { key: 'main_board', label: 'مين بورد', icon: Cpu, color: '#10b981' },
   ];
 
   const features = [
-    { icon: CheckCircle, title: 'ملفات مختبرة ومضمونة', description: 'جميع ملفات السوفتوير تم فحصها وتجربتها بعناية لضمان عدم تلف جهازك وتقليل المرتجعات.' },
-    { icon: Shield, title: 'مخططات هندسية دقيقة', description: 'انسَ البحث العشوائي، نوفر مخططات تفصيلية لتتبع المسارات واكتشاف الأعطال بسهولة.' },
-    { icon: Star, title: 'دعم فني جزائري', description: 'نحن نفهم السوق المحلية ونوفر تحديثات حصرية للأجهزة الأكثر انتشاراً في الجزائر.' },
-    { icon: Zap, title: 'تحديثات يومية وفورية', description: 'نضيف ملفات ومخططات جديدة يومياً لمواكبة أحدث الموديلات والأعطال الشائعة بالورشات.' },
+    { icon: Shield, title: 'ملفات مضمونة', description: 'جميع الملفات مجربة ومفحوصة.' },
+    { icon: Truck, title: 'تحميل فوري', description: 'حمل مباشر بعد الدفع.' },
+    { icon: Wrench, title: 'دعم تقني', description: 'فريق متخصص لمساعدتك.' },
+    { icon: Star, title: 'أسعار تنافسية', description: 'أفضل أسعار التوكنز.' },
+    { icon: Zap, title: 'تحديثات يومية', description: 'ملفات جديدة كل يوم.' }, 
+    { icon: TrendingUp, title: 'آلاف الموديلات', description: 'تغطية شاملة للشاشات.' },
+    { icon: Package, title: 'مخططات دقيقة', description: 'مخططات هندسية واضحة.' },
+    { icon: Search, title: 'بحث سريع', description: 'ابحث برقم الموديل فوراً.' },
+  ];
+
+  const brands = [
+    { name: 'Samsung', code: 'samsung', image: '/brands/samsung.png' },
+    { name: 'LG', code: 'lg', image: '/brands/lg.png' },
+    { name: 'Condor', code: 'condor', image: '/brands/condor.png' },
+    { name: 'Iris', code: 'iris', image: '/brands/iris.png' },
+    { name: 'Geant', code: 'geant', image: '/brands/geant.png' },
+    { name: 'Stream', code: 'stream', image: '/brands/stream.png' },
+    { name: 'Maxtor', code: 'maxtor', image: '/brands/maxtor.png' },
+    { name: 'Kiowa', code: 'kiowa', image: '/brands/kiowa.png' },
   ];
 
   return (
-    <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', direction: 'rtl', minHeight: '100vh' }}>
+    <div style={{ background: '#f8fafc', color: '#1e293b', direction: 'rtl', minHeight: '100vh', fontFamily: "'Cairo', sans-serif" }}>
       
-      <Helmet>
-        <title>SerialcoTV | منصة السوفتوير والمخططات الأولى في الجزائر</title>
-        <meta name="description" content="أول منصة جزائرية موثوقة توفر تحديثات السوفتوير والمخططات الهندسية الدقيقة لأكثر من 10,000 موديل شاشة." />
-        <meta property="og:title" content="SerialcoTV | منصة السوفتوير والمخططات" />
-        <meta property="og:description" content="حمل أحدث ملفات السوفتوير والمخططات بأسعار تنافسية والدفع عبر بريدي موب أو البطاقة الذهبية." />
-      </Helmet>
-
-      {/* Navbar */}
-      <nav className="glass sticky top-0 z-50" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', padding: '10px 12px' }}>
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
-          <div className="text-base font-black tracking-wider cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => navigate('/')}>
-            SERIALCO<span style={{ color: 'var(--accent)' }}>TV</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link to="/store" className="btn btn-ghost btn-sm text-xs px-3 py-1.5" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Search size={14} /> المتجر
-            </Link>
-            <button onClick={() => setShowPayment(true)} className="btn btn-primary btn-sm text-xs px-3 py-1.5">
-              اشترك الآن
-            </button>
-          </div>
+      {/* هيدر علوي */}
+      <nav style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '12px 16px', position: 'sticky', top: 0, zIndex: 50 }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link to="/" style={{ textDecoration: 'none', fontSize: 22, fontWeight: 900 }}>
+            <span style={{ color: '#6366f1' }}>SerialCo</span><span style={{ color: '#f59e0b' }}>TV</span>
+          </Link>
+          <Link to="/store" style={{ background: '#6366f1', color: '#fff', padding: '8px 18px', borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>المتجر</Link>
         </div>
       </nav>
 
-      {/* ✅ Hero - صورة فقط بدون عنوان وبدون زر */}
-      <header style={{ 
-        position: 'relative', 
-        width: '100%', 
-        height: '280px', 
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%)'
-      }}>
-        <img 
-          src="/hero-updates.png" 
-          alt="تحديثات وكرت مار"
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            objectFit: 'cover',
-            opacity: 0.85
-          }}
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }}
-        />
+      {/* سلايدر البانر */}
+      <header className="hero-banner" style={{ position: 'relative', overflow: 'hidden', background: '#0f172a' }}>
+        {slides.map((slide, index) => (
+          <div key={index} style={{ position: 'absolute', inset: 0, backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: currentSlide === index ? 1 : 0, transition: 'opacity 1s ease-in-out' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
+          </div>
+        ))}
       </header>
 
-      {/* Search Section */}
-      <section style={{ maxWidth: '600px', margin: '-30px auto 30px auto', padding: '0 12px', position: 'relative', zIndex: 10 }}>
-        <div className="card" style={{ padding: '12px 14px', boxShadow: '0 8px 20px rgba(0,0,0,0.12)', borderRadius: '16px' }}>
-          <form style={{ display: 'flex', gap: '8px' }} onSubmit={handleSearch}>
-            <input 
-              type="text" 
-              placeholder="ابحث برقم الموديل أو اللوحة..." 
-              className="field-input" 
-              style={{ padding: '12px 16px', fontSize: '13px', flex: 1, borderRadius: '12px' }}
-              value={searchQuery} 
-              onChange={(e) => setSearchQuery(e.target.value)} 
-            />
-            <button type="submit" className="btn btn-primary btn-sm text-xs" style={{ padding: '12px 18px', whiteSpace: 'nowrap', borderRadius: '12px' }}>
-              بحث
-            </button>
+      {/* صندوق البحث */}
+      <section style={{ maxWidth: 850, margin: '-40px auto 0', padding: '0 16px', position: 'relative', zIndex: 20 }}>
+        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: '14px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.08)' }}>
+          <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <select value={searchBrand} onChange={e => setSearchBrand(e.target.value)} style={{ padding: '12px 14px', border: '1px solid #e2e8f0', borderRadius: 10, background: '#f8fafc', outline: 'none', fontSize: 13, color: '#334155', cursor: 'pointer', flex: '1 1 120px' }}>
+              <option value="ALL">كل الماركات</option>
+              {brands.map(b => <option key={b.code} value={b.code}>{b.name}</option>)}
+            </select>
+            
+            <div style={{ position: 'relative', flex: '2 1 200px' }}>
+              <input type="text" placeholder="ابحث برقم الموديل، اللوحة..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '12px 36px 12px 36px', border: '1px solid #e2e8f0', borderRadius: 10, background: '#f8fafc', outline: 'none', boxSizing: 'border-box', fontSize: 13 }} />
+              <Search size={18} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              {searchQuery && <button type="button" onClick={() => setSearchQuery('')} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 2 }}><X size={16} /></button>}
+            </div>
+            
+            <button type="submit" style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 10, fontWeight: 700, cursor: 'pointer', fontSize: 14, flex: '0 1 auto' }}>بحث</button>
           </form>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section style={{ padding: '20px 12px 30px' }}>
-        <div className="max-w-6xl mx-auto">
-          <h2 style={{ fontSize: '20px', fontWeight: 900, textAlign: 'center', marginBottom: '20px', color: 'var(--primary)' }}>
-            لماذا يثق الفنيون في منصتنا؟
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
+      {/* أنواع الملفات */}
+      <section style={{ padding: '40px 16px 20px' }}>
+        <div style={{ maxWidth: 850, margin: '0 auto' }}>
+          <h2 data-reveal style={{ fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: 900, textAlign: 'center', marginBottom: 20, color: '#0f172a' }} className="reveal-item">أنواع الملفات</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, maxWidth: 700, margin: '0 auto' }}>
+            {fileTypes.map((type) => {
+              const Icon = type.icon;
               return (
-                <div key={index} className="card" style={{ padding: '16px 12px', textAlign: 'center' }}>
-                  <div style={{ background: 'rgba(99,102,241,0.12)', color: 'var(--primary)', margin: '0 auto 10px', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Icon size={22} />
+                <button key={type.key} data-reveal onClick={() => navigate(`/store?type=${type.key}`)} className="reveal-item" style={{ padding: 14, textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, transition: 'all 0.2s ease' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = type.color; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#e2e8f0'; }}>
+                  <div style={{ background: `${type.color}15`, color: type.color, margin: '0 auto 10px', width: 48, height: 48, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon size={24} /></div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>{type.label}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* أحدث الملفات */}
+      <section style={{ padding: '20px 16px 30px' }}>
+        <div style={{ maxWidth: 850, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            <h2 style={{ fontSize: 'clamp(18px, 4vw, 20px)', fontWeight: 900, color: '#0f172a', margin: 0 }}>أحدث السوفتويرات</h2>
+            <p style={{ fontSize: 12, color: '#64748b', margin: '4px 0 0 0' }}>ملفات مجربة وجاهزة للتحميل</p>
+          </div>
+          {loadingFiles ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
+              {[1, 2, 3, 4, 5].map(n => <div key={n} style={{ background: '#fff', height: 220, borderRadius: 12, border: '1px solid #e2e8f0', animation: 'pulse 1.5s infinite ease-in-out' }} />)}
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
+              {featuredFiles.map(file => (
+                <div key={file.id} onClick={() => navigate(`/store/product/${file.id}?type=firmware`)} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 10, cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = '#6366f1'} onMouseLeave={e => e.currentTarget.style.borderColor = '#e2e8f0'}>
+                  <div>
+                    <div style={{ height: 80, background: '#fafafa', borderRadius: 8, overflow: 'hidden', marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>
+                      📥
+                    </div>
+                    <h3 style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.brand__name} - {file.model_number}</h3>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#6366f1', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Coins size={12} /> {file.token_cost} توكن
+                    </div>
                   </div>
-                  <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '6px' }}>{feature.title}</h3>
-                  <p style={{ fontSize: '11.5px', lineHeight: '1.5', color: 'var(--text-secondary)' }}>{feature.description}</p>
+                  <button style={{ width: '100%', background: '#6366f1', color: '#fff', border: 'none', padding: '8px 10px', borderRadius: 8, fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                    <span>تحميل</span>
+                    <Download size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* المميزات */}
+      <section style={{ padding: '30px 16px' }}>
+        <div style={{ maxWidth: 850, margin: '0 auto' }}>
+          <h2 data-reveal style={{ fontSize: 'clamp(17px, 3.5vw, 20px)', fontWeight: 900, textAlign: 'center', marginBottom: 20 }} className="reveal-item">لماذا يثق الفنيون في SerialCoTV؟</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, maxWidth: 700, margin: '0 auto' }}>
+            {features.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <div key={i} data-reveal className="reveal-item" style={{ padding: 14, textAlign: 'center', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
+                  <div style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1', width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}><Icon size={20} /></div>
+                  <h3 style={{ fontSize: 13, fontWeight: 800, marginBottom: 4, color: '#0f172a' }}>{f.title}</h3>
+                  <p style={{ fontSize: 11, color: '#64748b', margin: 0, lineHeight: 1.4 }}>{f.description}</p>
                 </div>
               );
             })}
@@ -183,163 +213,63 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Brands Section */}
-      <section style={{ background: 'var(--bg-secondary)', padding: '30px 12px' }}>
-        <div className="max-w-4xl mx-auto">
-          <h2 style={{ fontSize: '20px', fontWeight: 900, textAlign: 'center', marginBottom: '20px', color: 'var(--primary)' }}>
-            ندعم آلاف الموديلات لأشهر العلامات
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            {brands.map((brand, index) => (
-              <div key={index} className="card" style={{ padding: '10px 8px', textAlign: 'center' }}>
-                <img src={brand.image} alt={brand.name} loading="lazy" style={{ width: '100%', height: '50px', objectFit: 'contain', borderRadius: '8px' }} />
-              </div>
+      {/* شبكة الماركات */}
+      <section style={{ padding: '24px 16px 20px' }}>
+        <div style={{ maxWidth: 850, margin: '0 auto' }}>
+          <h2 data-reveal style={{ fontSize: 'clamp(17px, 3.5vw, 20px)', fontWeight: 900, textAlign: 'center', marginBottom: 16 }} className="reveal-item">ملفات لجميع الماركات</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: 10 }}>
+            {brands.map((brand, i) => (
+              <button key={i} data-reveal onClick={() => navigate(`/store?brand=${brand.code}`)} className="reveal-item" style={{ padding: '10px 6px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 65, transition: 'all 0.2s', fontWeight: 700, fontSize: 12, color: '#334155' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                <span>{brand.name}</span>
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Available Files Section */}
-      <section style={{ padding: '30px 12px' }}>
-        <div className="max-w-6xl mx-auto">
-          <h2 style={{ fontSize: '20px', fontWeight: 900, textAlign: 'center', marginBottom: '20px', color: 'var(--primary)' }}>
-            أحدث الملفات المتاحة
-          </h2>
-          
-          <div style={{ 
-            display: 'flex', 
-            gap: 12, 
-            overflowX: 'auto', 
-            paddingBottom: 12,
-            scrollbarWidth: 'thin',
-            WebkitOverflowScrolling: 'touch'
-          }}>
-            {loadingFiles ? (
-              <div style={{ width: '100%', textAlign: 'center', padding: '20px' }}>
-                <Loader2 className="animate-spin" size={24} style={{ margin: '0 auto', color: 'var(--primary)' }} />
-              </div>
-            ) : latestFiles.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', textAlign: 'center', width: '100%', fontSize: '13px' }}>لا توجد ملفات بعد</p>
-            ) : (
-              latestFiles.slice(0, 10).map((file: any) => (
-                <div key={file.id} style={{ 
-                  minWidth: 180, 
-                  maxWidth: 180,
-                  background: 'var(--bg-card)', 
-                  border: '1px solid var(--border)', 
-                  borderRadius: 14, 
-                  padding: 14,
-                  flexShrink: 0,
-                  cursor: 'pointer',
-                }}
-                onClick={() => navigate(`/store/product/${file.id}?type=firmware`)}
-                >
-                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>{file.brand__name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{file.model_number}</div>
-                  <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Coins size={13} /> {file.token_cost} توكن
-                  </div>
-                </div>
-              ))
-            )}
+      {/* الباقات */}
+      <section style={{ padding: '16px 16px 10px' }}>
+        <div data-reveal className="reveal-item custom-part-card" style={{ maxWidth: 850, margin: '0 auto', background: '#ffffff', border: '2px dashed #6366f1', borderRadius: 16, padding: '20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+          <div style={{ flex: '1 1 240px' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 900, color: '#0f172a', margin: '0 0 4px 0' }}>اشترك في الباقات</h3>
+            <p style={{ fontSize: 12, color: '#64748b', margin: 0, lineHeight: 1.5 }}>احصل على توكنز بأسعار مناسبة وحمّل كل الملفات التي تحتاجها.</p>
           </div>
+          <Link to="/store" style={{ background: '#6366f1', color: '#fff', padding: '10px 18px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)' }}>
+            <Sparkles size={15} />
+            <span>اشترك الآن</span>
+          </Link>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" style={{ background: 'var(--bg-secondary)', padding: '40px 12px' }}>
-        <div style={{ maxWidth: '750px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '22px', fontWeight: 900, marginBottom: '8px', color: 'var(--primary)' }}>اختر الباقة المناسبة</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>اشتراكات بسيطة تناسب جميع احتياجات الفنيين</p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'stretch' }}>
-            
-            <div style={{ background: 'var(--bg-card)', border: '2px solid var(--accent)', borderRadius: '14px', padding: '24px 18px 18px 18px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 6px 20px rgba(0,0,0,0.06)' }}>
-              <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'var(--accent)', color: '#fff', fontSize: '11px', fontWeight: 'bold', padding: '4px 14px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
-                <Sparkles size={12} /><span>الأكثر مبيعاً</span>
-              </div>
-              <div style={{ marginTop: '8px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 'bold' }}>الباقة الذهبية</h3>
-                <p style={{ marginBottom: '14px', fontSize: '12px', color: 'var(--text-secondary)' }}>للمحترفين والورش النشطة</p>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '14px' }}>
-                  <span style={{ fontSize: '24px', fontWeight: 900, color: 'var(--accent)' }}>3000</span>
-                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>د.ج</span>
-                </div>
-                <hr style={{ borderColor: 'var(--border)', margin: '0 0 14px 0' }} />
-                <ul style={{ listStyle: 'none', padding: 0, fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}><Check size={14} style={{ color: 'var(--accent)' }} />3,000 توكن</li>
-                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}><Check size={14} style={{ color: 'var(--accent)' }} />مخططات ومستندات كاملة</li>
-                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={14} style={{ color: 'var(--accent)' }} />أولوية في الدعم الفني</li>
-                </ul>
-              </div>
-              <button onClick={() => handleSubscribe('ذهبية')} className="btn btn-accent btn-block btn-sm text-xs py-2.5" style={{ width: '100%', marginTop: '16px' }}>اشترك الآن</button>
-            </div>
-
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', padding: '24px 18px 18px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 'bold' }}>الباقة الفضية</h3>
-                <p style={{ marginBottom: '14px', fontSize: '12px', color: 'var(--text-secondary)' }}>للورش الخفيفة والمبتدئين</p>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '14px' }}>
-                  <span style={{ fontSize: '24px', fontWeight: 900, color: 'var(--primary)' }}>1500</span>
-                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>د.ج</span>
-                </div>
-                <hr style={{ borderColor: 'var(--border)', margin: '0 0 14px 0' }} />
-                <ul style={{ listStyle: 'none', padding: 0, fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}><Check size={14} style={{ color: 'var(--success)' }} />1,500 توكن</li>
-                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}><Check size={14} style={{ color: 'var(--success)' }} />مخططات ومستندات كاملة</li>
-                  <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={14} style={{ color: 'var(--success)' }} />صلاحية غير محدودة</li>
-                </ul>
-              </div>
-              <button onClick={() => handleSubscribe('فضية')} className="btn btn-ghost btn-block btn-sm text-xs py-2.5" style={{ width: '100%', marginTop: '16px' }}>اشترك الآن</button>
-            </div>
-
-          </div>
+      {/* دعوة للتحميل */}
+      <section style={{ padding: '24px 16px 30px' }}>
+        <div data-reveal className="reveal-item" style={{ maxWidth: 850, margin: '0 auto', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: 16, padding: '28px 18px', textAlign: 'center', color: '#fff' }}>
+          <h2 style={{ fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: 900, color: '#f59e0b', marginBottom: 8 }}>هل تبحث عن سوفتوير نادر؟</h2>
+          <p style={{ color: '#94a3b8', marginBottom: 20, fontSize: 13 }}>نوفر لك أحدث الملفات والمخططات لمختلف الشاشات والماركات.</p>
+          <Link to="/store" style={{ background: '#6366f1', color: '#fff', padding: '10px 24px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span>تصفح المتجر الآن</span>
+            <ArrowRight size={15} style={{ transform: 'rotate(180deg)' }} />
+          </Link>
         </div>
       </section>
 
-      {/* Payment Modal */}
-      <Modal isOpen={showPayment} onClose={() => setShowPayment(false)} title="اختر طريقة الدفع">
-        <PaymentModal selectedPlan={selectedPlan} onClose={() => setShowPayment(false)} />
-      </Modal>
-
-      {/* Footer */}
-      <footer style={{ background: 'var(--bg-sidebar)', color: 'var(--text-sidebar)', borderTop: '1px solid var(--border)', padding: '30px 12px 16px 12px' }}>
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div>
-            <div className="text-base font-black text-white tracking-wider" style={{ marginBottom: '8px' }}>SERIALCO<span style={{ color: 'var(--accent)' }}>TV</span></div>
-            <p style={{ fontSize: '11px', lineHeight: 1.5, opacity: 0.8 }}>المنصة الأولى لدعم فنيي الشاشات بملفات السوفتوير والمخططات المضمونة في الجزائر.</p>
-          </div>
-          <div>
-            <h4 style={{ color: '#fff', fontWeight: 'bold', marginBottom: '8px', fontSize: '12px' }}>روابط سريعة</h4>
-            <ul style={{ listStyle: 'none', padding: 0, fontSize: '11px' }}>
-              <li style={{ marginBottom: '6px' }}><Link to="/contact" style={{ color: 'inherit', textDecoration: 'none' }}>اتصل بنا</Link></li>
-              <li style={{ marginBottom: '6px' }}><Link to="/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>سياسة الاستخدام</Link></li>
-              <li style={{ marginBottom: '6px' }}><Link to="/terms" style={{ color: 'inherit', textDecoration: 'none' }}>شروط الاستخدام</Link></li>
-              <li style={{ marginBottom: '6px' }}><Link to="/faq" style={{ color: 'inherit', textDecoration: 'none' }}>الأسئلة الشائعة</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 style={{ color: '#fff', fontWeight: 'bold', marginBottom: '8px', fontSize: '12px' }}>تابعنا</h4>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" style={{ background: '#1877F2', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', color: '#fff' }}>
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-              </a>
-              <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" style={{ background: '#0088cc', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', color: '#fff' }}>
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.46-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.442-.751-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.145.118.185.276.204.408.019.132.043.43.024.662z"/></svg>
-              </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" style={{ background: '#FF0000', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', color: '#fff' }}>
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div style={{ textAlign: 'center', marginTop: '20px', paddingTop: '12px', borderTop: '1px solid #334155', fontSize: '11px', opacity: 0.7 }}>
-          <p>&copy; 2026 SerialcoTV. جميع الحقوق محفوظة.</p>
+      {/* الفوتر */}
+      <footer style={{ background: '#fff', borderTop: '1px solid #e2e8f0', padding: '24px 16px 32px', textAlign: 'center' }}>
+        <div style={{ maxWidth: 850, margin: '0 auto' }}>
+          <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 4 }}>SerialCo<span style={{ color: '#f59e0b' }}>TV</span></div>
+          <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>منصة السوفتوير والمخططات الأولى في الجزائر</p>
         </div>
       </footer>
 
+      <style>{`
+        .hero-banner { height: 240px; }
+        @media (min-width: 640px) { .hero-banner { height: 350px; } }
+        .reveal-item { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+        .reveal-item.is-visible { opacity: 1 !important; transform: translateY(0) !important; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
+      `}</style>
     </div>
   );
 }
