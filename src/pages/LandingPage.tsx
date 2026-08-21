@@ -6,17 +6,10 @@ const API = 'https://serialcotv.onrender.com';
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchBrand, setSearchBrand] = useState('ALL');
   const [featuredFiles, setFeaturedFiles] = useState<any[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(true);
-
-  const slides = [
-    { image: '/hero/firmware.jpg' },
-    { image: '/hero/schematics.jpg' },
-    { image: '/hero/updates.jpg' },
-  ];
 
   useEffect(() => {
     let isMounted = true;
@@ -31,11 +24,6 @@ export default function LandingPage() {
       .finally(() => { if (isMounted) setLoadingFiles(false); });
     return () => { isMounted = false; };
   }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentSlide((prev) => (prev + 1) % slides.length), 4500);
-    return () => clearInterval(interval);
-  }, [slides.length]);
 
   useEffect(() => {
     const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
@@ -100,7 +88,7 @@ export default function LandingPage() {
   return (
     <div style={{ background: '#f1f5f9', color: '#0f172a', direction: 'rtl', minHeight: '100vh', fontFamily: "'Cairo', sans-serif" }}>
       
-      {/* هيدر علوي Glassmorphism */}
+      {/* هيدر علوي */}
       <nav style={{ background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(226, 232, 240, 0.8)', padding: '14px 20px', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link to="/" style={{ textDecoration: 'none', fontSize: 24, fontWeight: 900, letterSpacing: '-0.5px' }}>
@@ -110,16 +98,15 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* سلايدر البانر */}
-      <header className="hero-banner" style={{ position: 'relative', overflow: 'hidden', background: '#090d16' }}>
-        {slides.map((slide, index) => (
-          <div key={index} style={{ position: 'absolute', inset: 0, backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: currentSlide === index ? 1 : 0, transition: 'opacity 1s ease-in-out' }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,0.4) 0%, rgba(15,23,42,0.85) 100%)' }} />
-          </div>
-        ))}
-      </header>
+      {/* ✅ Hero - صورة ثابتة بدون سلايدر وبدون تظليل */}
+      <header className="hero-banner" style={{ 
+        backgroundImage: 'url(/hero.jpg)', 
+        backgroundSize: 'cover', 
+        backgroundPosition: 'center',
+        position: 'relative'
+      }} />
 
-      {/* صندوق البحث الحائم */}
+      {/* صندوق البحث */}
       <section style={{ maxWidth: 880, margin: '-50px auto 0', padding: '0 16px', position: 'relative', zIndex: 20 }}>
         <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 20, padding: '16px', boxShadow: '0 20px 35px -10px rgba(15, 23, 42, 0.08)' }}>
           <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
