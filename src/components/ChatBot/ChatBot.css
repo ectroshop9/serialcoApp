@@ -109,16 +109,18 @@
   line-height: 1.6;
 }
 
+/* ✅ إصلاح اللون الأبيض */
 .msg-bubble.bot {
   background: #fff;
   border: 1px solid #e2e8f0;
+  color: #1e293b !important;
   border-radius: 12px 12px 12px 4px;
   align-self: flex-start;
 }
 
 .msg-bubble.user {
   background: #3b82f6;
-  color: #fff;
+  color: #ffffff !important;
   border-radius: 12px 12px 4px 12px;
   align-self: flex-end;
 }
@@ -152,6 +154,7 @@
 .typing-indicator {
   background: #fff;
   border: 1px solid #e2e8f0;
+  color: #1e293b;
   padding: 8px 14px;
   border-radius: 12px;
   max-width: 60px;
@@ -176,6 +179,7 @@
   font-size: 13px;
   outline: none;
   transition: all 0.2s ease;
+  color: #1e293b;
 }
 
 .chatbot-footer input:focus {
