@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Cpu, Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, MessageCircle, Coins, Sparkles } from 'lucide-react';
+import { Cpu, Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, MessageCircle, Coins, Sparkles, Zap } from 'lucide-react';
 
 const API = 'https://serialcotv.onrender.com';
 
@@ -9,7 +9,7 @@ export default function LandingPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchBrand, setSearchBrand] = useState('ALL');
-  const [featuredFiles, setFeaturedFiles] = useState([]);
+  const [featuredFiles, setFeaturedFiles] = useState<any[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(true);
 
   const PAGE_ID = "61593351994312";
@@ -25,7 +25,10 @@ export default function LandingPage() {
     fetch(`${API}/api/content/firmware/`)
       .then(r => r.json())
       .then(data => {
-        if (isMounted && data?.success) setFeaturedFiles((data.firmwares || []).slice(0, 5));
+        if (isMounted) setFeaturedFiles((data?.firmwares || []).slice(0, 5));
+      })
+      .catch(() => {
+        if (isMounted) setFeaturedFiles([]);
       })
       .finally(() => { if (isMounted) setLoadingFiles(false); });
     return () => { isMounted = false; };
@@ -37,7 +40,7 @@ export default function LandingPage() {
   }, [slides.length]);
 
   useEffect(() => {
-    const elements = Array.from(document.querySelectorAll('[data-reveal]'));
+    const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
     if (!elements.length) return;
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => { 
@@ -59,7 +62,7 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, [featuredFiles, loadingFiles]);
 
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.append('q', searchQuery.trim());
