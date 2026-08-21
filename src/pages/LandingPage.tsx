@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { 
-  CheckCircle, Shield, Star, Zap, Search, ChevronLeft, 
+  CheckCircle, Shield, Star, Zap, Search , 
   Check, Sparkles, Coins, Loader2 
 } from 'lucide-react';
 import Modal from '../components/UI/Modal';
@@ -118,37 +118,42 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Header */}
-      <header className="hero-wrapper" style={{ padding: '32px 16px 40px 16px', position: 'relative', zIndex: 1 }}>
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 style={{ fontSize: 'clamp(22px, 5vw, 32px)', fontWeight: 900, marginBottom: '12px', lineHeight: 1.35 }}>
-            الحل الجذري لأعطال شاشات LED و Plasma<br />
-            <span style={{ color: 'var(--accent)' }}>في ثوانٍ معدودة.</span>
-          </h1>
-          <p style={{ fontSize: '13px', color: '#f1f5f9', opacity: 0.9, maxWidth: '550px', margin: '0 auto 20px auto', padding: '0 8px' }}>
-            أول منصة جزائرية موثوقة توفر تحديثات السوفتوير والمخططات الهندسية الدقيقة لأكثر من 10,000 موديل شاشة.
-          </p>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-            <Link to="/store" className="btn btn-accent btn-sm text-xs py-2.5 px-5" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <span>تصفح الملفات</span><ChevronLeft size={16} />
-            </Link>
-          </div>
-        </div>
+      {/* ✅ Hero - صورة فقط بدون عنوان وبدون زر */}
+      <header style={{ 
+        position: 'relative', 
+        width: '100%', 
+        height: '280px', 
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%)'
+      }}>
+        <img 
+          src="/hero-updates.png" 
+          alt="تحديثات وكرت مار"
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            objectFit: 'cover',
+            opacity: 0.85
+          }}
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
+        />
       </header>
 
       {/* Search Section */}
-      <section style={{ maxWidth: '600px', margin: '20px auto 30px auto', padding: '0 12px', position: 'relative', zIndex: 10 }}>
-        <div className="card" style={{ padding: '10px 12px', boxShadow: '0 8px 20px rgba(0,0,0,0.06)' }}>
+      <section style={{ maxWidth: '600px', margin: '-30px auto 30px auto', padding: '0 12px', position: 'relative', zIndex: 10 }}>
+        <div className="card" style={{ padding: '12px 14px', boxShadow: '0 8px 20px rgba(0,0,0,0.12)', borderRadius: '16px' }}>
           <form style={{ display: 'flex', gap: '8px' }} onSubmit={handleSearch}>
             <input 
               type="text" 
               placeholder="ابحث برقم الموديل أو اللوحة..." 
               className="field-input" 
-              style={{ padding: '10px 14px', fontSize: '13px', flex: 1 }}
+              style={{ padding: '12px 16px', fontSize: '13px', flex: 1, borderRadius: '12px' }}
               value={searchQuery} 
               onChange={(e) => setSearchQuery(e.target.value)} 
             />
-            <button type="submit" className="btn btn-primary btn-sm text-xs" style={{ padding: '10px 16px', whiteSpace: 'nowrap' }}>
+            <button type="submit" className="btn btn-primary btn-sm text-xs" style={{ padding: '12px 18px', whiteSpace: 'nowrap', borderRadius: '12px' }}>
               بحث
             </button>
           </form>
@@ -156,7 +161,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section style={{ padding: '30px 12px' }}>
+      <section style={{ padding: '20px 12px 30px' }}>
         <div className="max-w-6xl mx-auto">
           <h2 style={{ fontSize: '20px', fontWeight: 900, textAlign: 'center', marginBottom: '20px', color: 'var(--primary)' }}>
             لماذا يثق الفنيون في منصتنا؟
@@ -334,33 +339,6 @@ export default function LandingPage() {
           <p>&copy; 2026 SerialcoTV. جميع الحقوق محفوظة.</p>
         </div>
       </footer>
-
-      {/* Floating Messenger Button */}
-      <a 
-        href="https://m.me/serialcotv" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        style={{ 
-          position: 'fixed', 
-          bottom: '20px', 
-          left: '20px', 
-          width: '50px', 
-          height: '50px', 
-          borderRadius: '50%', 
-          background: 'linear-gradient(135deg, #0084FF 0%, #00C6FF 100%)', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          boxShadow: '0 4px 14px rgba(0, 132, 255, 0.45)', 
-          zIndex: 40, 
-          color: '#fff' 
-        }}
-        title="تواصل معنا عبر ميسنجر"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.45 5.513 3.714 7.214V22l3.355-1.843c.928.257 1.91.397 2.931.397 5.523 0 10-4.145 10-9.296C22 6.145 17.523 2 12 2zm1.193 12.48l-2.556-2.727-4.99 2.727 5.49-5.823 2.622 2.727 4.925-2.727-5.491 5.823z" />
-        </svg>
-      </a>
 
     </div>
   );
