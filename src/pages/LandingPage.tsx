@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Download, FileText, Package, Wrench, Shield, Truck, Star, Search, X, TrendingUp, ArrowRight, Coins, Sparkles, Zap, ChevronLeft, Check, User } from 'lucide-react';
+import Modal from '../components/UI/Modal';
+import PaymentModal from '../components/PaymentModal';
 
 const API = 'https://serialcotv.onrender.com';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [showPayment, setShowPayment] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchBrand, setSearchBrand] = useState('ALL');
   const [featuredFiles, setFeaturedFiles] = useState<any[]>([]);
@@ -54,6 +58,11 @@ export default function LandingPage() {
     if (searchQuery.trim()) params.append('q', searchQuery.trim());
     if (searchBrand !== 'ALL') params.append('brand', searchBrand);
     navigate(`/store?${params.toString()}`);
+  };
+
+  const handleSubscribe = (plan: string) => {
+    setSelectedPlan(plan);
+    setShowPayment(true);
   };
 
   // ✅ التصنيفات - فقط سوفتويرات ومخططات
@@ -132,7 +141,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* تصنيفات المكتبة - فقط 2 */}
+      {/* تصنيفات المكتبة */}
       <section style={{ padding: '48px 16px 24px' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
           <h2 data-reveal style={{ fontSize: 'clamp(22px, 4vw, 26px)', fontWeight: 900, textAlign: 'center', marginBottom: 24, color: '#0f172a' }} className="reveal-item">تصنيفات المكتبة</h2>
@@ -200,11 +209,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* المميزات - متجاوب */}
+      {/* المميزات - 4 في الصف */}
       <section style={{ padding: '36px 16px', background: '#fff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
           <h2 data-reveal style={{ fontSize: 'clamp(20px, 3.5vw, 24px)', fontWeight: 900, textAlign: 'center', marginBottom: 28, color: '#0f172a' }} className="reveal-item">لماذا يفضل الفنيون منصتنا؟</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
             {features.map((f, i) => {
               const Icon = f.icon;
               return (
@@ -221,13 +230,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* الماركات - متجاوب */}
+      {/* الماركات - 5 في الصف وأكبر */}
       <section style={{ padding: '36px 16px' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
           <h2 data-reveal style={{ fontSize: 'clamp(20px, 3.5vw, 24px)', fontWeight: 900, textAlign: 'center', marginBottom: 20 }} className="reveal-item">تصفح حسب الماركة العالمية</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14, maxWidth: 750, margin: '0 auto' }}>
             {brands.map((brand, i) => (
-              <button key={i} data-reveal onClick={() => navigate(`/store?brand=${brand.code}`)} className="reveal-item brand-card" style={{ padding: '16px 10px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 70, transition: 'all 0.2s', fontWeight: 800, fontSize: 15, color: '#334155', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+              <button key={i} data-reveal onClick={() => navigate(`/store?brand=${brand.code}`)} className="reveal-item brand-card" style={{ padding: '20px 12px', textAlign: 'center', cursor: 'pointer', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 85, transition: 'all 0.2s', fontWeight: 800, fontSize: 16, color: '#334155', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                 <span>{brand.name}</span>
               </button>
             ))}
@@ -252,7 +261,7 @@ export default function LandingPage() {
                 <li style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Check size={16} color="#f59e0b" /> مخططات ومستندات كاملة</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Check size={16} color="#f59e0b" /> أولوية في الدعم الفني</li>
               </ul>
-              <button onClick={() => navigate('/payment?plan=gold')} style={{ display: 'block', width: '100%', marginTop: 20, background: '#f59e0b', color: '#fff', padding: '12px', borderRadius: 12, border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>اشترك الآن</button>
+              <button onClick={() => handleSubscribe('ذهبية')} style={{ display: 'block', width: '100%', marginTop: 20, background: '#f59e0b', color: '#fff', padding: '12px', borderRadius: 12, border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>اشترك الآن</button>
             </div>
 
             <div data-reveal className="reveal-item" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 18, padding: '28px 20px', textAlign: 'center' }}>
@@ -263,7 +272,7 @@ export default function LandingPage() {
                 <li style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Check size={16} color="#4f46e5" /> مخططات ومستندات كاملة</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Check size={16} color="#4f46e5" /> صلاحية غير محدودة</li>
               </ul>
-              <button onClick={() => navigate('/payment?plan=silver')} style={{ display: 'block', width: '100%', marginTop: 20, background: '#4f46e5', color: '#fff', padding: '12px', borderRadius: 12, border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>اشترك الآن</button>
+              <button onClick={() => handleSubscribe('فضية')} style={{ display: 'block', width: '100%', marginTop: 20, background: '#4f46e5', color: '#fff', padding: '12px', borderRadius: 12, border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>اشترك الآن</button>
             </div>
           </div>
         </div>
@@ -288,6 +297,11 @@ export default function LandingPage() {
           <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>المنصة التقنية الأولى للتحديثات، السوفتوير والمخططات الهندسية</p>
         </div>
       </footer>
+
+      {/* Payment Modal */}
+      <Modal isOpen={showPayment} onClose={() => setShowPayment(false)} title="اختر طريقة الدفع">
+        <PaymentModal selectedPlan={selectedPlan} onClose={() => setShowPayment(false)} />
+      </Modal>
 
       {/* CSS */}
       <style>{`
